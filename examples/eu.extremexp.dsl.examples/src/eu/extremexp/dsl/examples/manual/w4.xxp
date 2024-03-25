@@ -1,7 +1,0 @@
-package manual ;
-
-// at this moment imported namespaces are not part of the language
-
-workflow w4 from  {
-	
-}
