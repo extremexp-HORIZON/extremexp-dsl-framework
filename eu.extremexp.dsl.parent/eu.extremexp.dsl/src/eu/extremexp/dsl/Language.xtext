@@ -1,0 +1,402 @@
+grammar eu.extremexp.dsl.Language with org.eclipse.xtext.common.Terminals
+
+generate language "http://www.extremexp.eu/dsl/Language"
+
+
+
+Model:
+	namespace=Namespace?
+;
+
+    
+/////////////////////////////////////// Namespace BEGIN ///////////////////////////////////////
+
+/* 
+ * There is no need to import other workflows, but we will use qualified name for now
+ * pro:
+ * it is basically clear which workflow is assembled from which
+ * con: 
+ * it is needed to add the package-name before assembling
+ */
+
+QualifiedName:
+    ID ('.' ID)*;
+    
+/*
+ * We plan to use the same organization of files with definitions as it is used, for example,
+ * in Java. I.e., each workflow is defined in its own file with the same name as the name of the 
+ * workflow (plus the extension xxp – a shortcut for ExtremeXP). The package is then a hierarchical
+ * name corresponding to directories in a path where the file is stored.
+ * 
+ */	
+	
+Namespace:
+	'package' name=QualifiedName ';' 
+	 workflows += (Workflow|AssembledWorkflow)*
+;
+
+
+/////////////////////////////////////// Namespace END ///////////////////////////////////////
+
+/////////////////////////////////////// Interfaces BEGIN ///////////////////////////////////////
+
+
+NamedElement:
+	{Task}|{Data}|{Param}
+;
+
+/*
+ * Abstraction for Workflow and AssembledWorkflow
+ * 
+ */	
+WorkflowInterface:
+	{Workflow}|{AssembledWorkflow}
+;
+
+
+/*
+ * Abstraction for data inputs and outputs to be resolved during M2M 
+*/
+
+DataOrTask:
+	{Data}|{Task}
+;
+
+///////////////////////////////////// Interfaces END ///////////////////////////////////////
+
+
+/////////////////////////////////////// Workflow BEGIN ///////////////////////////////////////
+
+/*
+ * Workflow is a block containing the definition and configuration of nodes, data, links, operators,
+ * and parameters of the workflow.
+ * 
+ */
+Workflow:
+	'workflow' name=ID '{'
+		(
+			tasks += Task							|
+			data += Data							|
+			taskConfigurations += TaskConfiguration	|
+			dataConfigurations += DataConfiguration	|
+			taskLinks += TaskLink					|
+			dataLinks += DataLink					|			
+			conditionalLinks += ConditionalLink		|
+			exceptionalLinks += ExceptionalLink		|
+			groups += Group							|
+			params += Param
+		)*
+		
+	'}'
+;
+
+/*
+ * AssembledWorkflow, as the name suggests, represents a workflow assembled from other workflows.
+ * It is always based on another workflow, in which the AssembledWorkflow allows designers to 
+ * configure the tasks – mainly to set the task’s implementation (in a workflow, a task’s 
+ * implementation may not be set – it is then an abstract task) and also to set particular 
+ * values of parameters.
+ * 
+ */
+ AssembledWorkflow:
+ 	'workflow' name=ID 'from' (workflow=[WorkflowInterface|QualifiedName]) '{'
+ 		(
+			taskConfigurations += TaskConfiguration	|
+			dataConfigurations += DataConfiguration	|
+			paramSets += ParamSet
+ 		)*
+ 	'}'
+ ;
+
+/////////////////////////////////////// Workflow END ///////////////////////////////////////
+
+/////////////////////////////////////// Task BEGIN ///////////////////////////////////////
+
+
+
+/*
+ * The Task class has been modified around its possible implementation. Either, the implementation 
+ * can be set via the attribute primitiveImplementation (which would refer to an executable file, 
+ * services, etc.), or it can be set via the association compositeImplementation (which would refer
+ *  to another workflow). If neither is set, then the task is abstract (and the isAbstract attribute
+ *  is set to true then).
+ * 
+*/
+
+
+Task:
+	'define' 'task' name=ID ';'
+;
+/*
+ * Within the configuration block, the task’s parameters and implementation can be defined (the param
+ * keyword and the implementation keyword). The implementation can be omitted and then 
+ * the task is abstract (its implementation is set later in an assembled workflow).
+ * 
+*/
+
+TaskConfiguration:
+	'configure' 'task' task=[Task|QualifiedName] '{'						
+		implementation=Implementation?
+		(
+			innerTaskConfigurations+= TaskConfiguration		|
+			innerDataConfigurations+= DataConfiguration		|
+			params += Param		|
+			data += Data
+		)* 
+			
+	'}'
+;
+
+/////////////////////////////////////// Task END ///////////////////////////////////////
+
+/////////////////////////////////////// Param BEGIN ///////////////////////////////////////
+
+Param:
+	'param' name=ID (assigned?='=' (arbitrary=Value|otherParam=[Param]))? ';'
+	
+;
+
+ParamSet:
+	'param' param=[Param] '=' (arbitrary=Value|otherParam=[Param]) ';'
+	
+;
+
+Value:
+	string=STRING | int=INT | double=DOUBLE | sint=SINT | list=List | dict=Dict
+;
+
+List:
+	'[' values+=Value+ (',' values+=Value)* ']'
+;
+
+KeyPairValue:
+	(
+		keyString = STRING |
+		keyInteger = INT
+	) ':'
+	(value = Value)	
+;
+
+Dict:
+	'{' pairs+=KeyPairValue+ (',' pairs+=KeyPairValue)* '}'
+;
+terminal SINT:
+	'-'INT
+;
+
+terminal DOUBLE:
+	('-'|'+')?INT'.'INT
+;
+/////////////////////////////////////// Param END ///////////////////////////////////////
+//
+///////////////////////////////////////// Implementation BEGIN ///////////////////////////////////////
+///*
+// * The implementation can be: 
+// * (i) a string pointing to an executable file, service url, etc. (a primitive task), or 
+// * (ii) a name of another workflow (a composite task).   
+//
+//*/
+Implementation:
+	'implementation' (filename=STRING | workflow=[WorkflowInterface|ID]) ';'
+;
+
+///////////////////////////////////////// Implementation END ///////////////////////////////////////
+
+/////////////////////////////////////// Data BEGIN ///////////////////////////////////////
+/*
+* defines datasets (inputs/outputs of tasks)
+* The structure of a dataset is either defined externally (by a schema) or can be defined directly.
+*/
+
+Data:
+	'define' 'data' name=ID (
+		(abstract?=';') | 
+		(withSchema?='{' schema=Schema '}')	|
+		(copied?='=' otherData=[Data] ';')
+	)
+;
+
+Schema:
+	'schema' schemaText=STRING ';'
+;
+
+DataConfiguration:
+	'configure' 'data' data=[Data] '{'
+		schema=Schema
+						
+	'}'
+;
+
+/////////////////////////////////////// Data END ///////////////////////////////////////
+
+
+/////////////////////////////////////// Link BEGIN ///////////////////////////////////////
+/*
+ * a special “singleton” task, where the workflow execution starts.
+ * No link can end in this task. During M2M, the terminal is converted to StartTask.
+*/
+ 
+terminal START:
+	'START'
+;
+
+/*
+ * a special “singleton” task, where the workflow execution ends.
+ * No link can start in this task. During M2M, the terminal is converted to EndTask.
+*/
+
+terminal END:
+	'END'
+;
+
+/*
+ * Simple Start -> Task link 
+*/
+
+Start2Task:
+	START '->' (targetOperator=Operator|targetTask=[Task])
+;
+
+/*
+ * Simple Task -> End link 
+*/
+
+Task2End:
+	(originOperator=Operator|originTask=[Task]) '->' END
+;
+
+/*
+ * Simple Task -> Task link 
+*/
+Task2Task:
+	(originOperator=Operator|originTask=[Task]) '->' (targetOperator=Operator|targetTask=[Task])
+;
+
+/*
+ * Three possibilities:
+ * (1) one of simple links
+ * (2) A chain of links starting with either task or START and ending with either END or task
+ * (3) one of simple links with additional end
+*/ 
+
+
+
+TaskLink:
+    	(
+    		(created=Start2Task|created=Task2Task|created=Task2End) ';'
+    	)		
+		|
+		(
+		   (created=Start2Task|created=Task2Task) 
+		   ('->' (targetTasks+=[Task]|targetOperators+=Operator))+ 
+		   ('->' ended=END)? ';'
+		)
+		|
+		(
+		   (created=Start2Task|created=Task2Task) '->' ended=END ';'
+		)
+;
+
+
+
+
+/*
+ * From Data/Task to Data/Task, but we should check that type(target) != type(origin)  
+*/
+
+SingleDataToTaskLink:
+	(origin = [DataOrTask|ID]) '-->' (target = [DataOrTask|ID])
+;
+
+
+DataLink:
+	(
+		(simpleDataToTaskLink=SingleDataToTaskLink ';') |
+		(links=SingleDataToTaskLink ('-->' (targets+=[DataOrTask|ID]))+ ('-->' ended=END)? ';') |
+		(simpleEnded=SingleDataToTaskLink '-->' ended=END ';') 
+	)
+	
+
+;
+
+
+/*
+ * Conditional Link between two tasks with provided condition  
+*/
+
+ConditionalLinkWithSymbol:
+	(originOperator=Operator|originTask=[Task]|started?=START) 
+	'?->' (targetOperator=Operator|targetTask=[Task]|ended?=END) '{'
+		'condition' condition=STRING ';'
+	'}'
+;
+
+ExclusiveLink:
+	origin=ExclusiveOperator '->' (targetOperator=Operator|targetTask=[Task]|ended?=END) '{'
+		'condition' condition=STRING ';'
+	'}'
+;
+
+ConditionalLink:
+	inclusive=ConditionalLinkWithSymbol | exclusive=ExclusiveLink
+;
+
+/*
+ * Exceptional Link between two tasks with provided condition  
+*/
+
+ExceptionalLink:
+	origin=[Task] '!->' target=[Task] '{'
+		'exception' exception=STRING ';'
+	'}'
+;
+
+
+/////////////////////////////////////// Link END ///////////////////////////////////////
+
+/////////////////////////////////////// Operator START ///////////////////////////////////////
+
+/*
+ *	PARALLEL_x, PARALLEL_END_x, EXCLUSIVE_x, EXCLUSIVE_END_x, INCLUSIVE_x, 
+ * INCLUSIVE_END_x, COMPLEX_x, COMPLEX_END_x – define operators (as they are 
+ * defined in the meta-model) The operators can be considered in the scope of 
+ * DSL as specialized tasks with predefined semantics. The “x” is a number to 
+ * distinguish a particular instance of the operator. The “_END_x” variant is 
+ * the corresponding end of a particular operator.
+*/
+
+Operator :
+	parallel = ParallelOperator |
+	exlcusive = ExclusiveOperator |
+	inclusive = InclusiveOperator |
+	complex = ComplexOprator
+;
+
+ParallelOperator returns Operator  hidden():
+	'PARALLEL-'(end?='END-')?name=INT
+;
+
+ExclusiveOperator returns Operator  hidden():
+	'EXCLUSIVE-'(end?='END-')?name=INT
+;
+
+InclusiveOperator returns Operator  hidden():
+	'INCLUSIVE-'(end?='END-')?name=INT
+;
+
+ComplexOprator returns Operator  hidden():
+	'COMPLEX-'(end?='END-')?name=INT
+;
+
+/////////////////////////////////////// Operator END ///////////////////////////////////////
+
+
+/////////////////////////////////////// Group START ///////////////////////////////////////
+
+Group:
+	'group' name=ID '{'
+		( tasks += [Task] ';')*  
+	'}'
+;
+
+///////////////////////////////////// Group End ///////////////////////////////////////
