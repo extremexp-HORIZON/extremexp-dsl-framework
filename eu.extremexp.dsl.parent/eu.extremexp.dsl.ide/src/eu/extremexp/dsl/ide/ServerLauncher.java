@@ -29,7 +29,7 @@ import com.google.inject.Injector;
  */
 public class ServerLauncher {
 	public static void main(String[] args) throws InterruptedException, IOException {
-		System.out.println("Welcome to XXP LSP version 4.0");
+		System.out.println("Welcome to XXP LSP version 4.0 - Resolved");
 		Injector injector = Guice.createInjector(new ServerModule());
 		LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);
 		Function<MessageConsumer, MessageConsumer> wrapper = consumer -> {

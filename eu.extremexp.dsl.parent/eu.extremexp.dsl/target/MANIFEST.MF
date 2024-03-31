@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.extremexp.dsl
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.202403252227
+Bundle-Version: 1.0.0.202403311951
 Bundle-SymbolicName: eu.extremexp.dsl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,org.eclipse.xtext.xbase,org.eclipse.eq

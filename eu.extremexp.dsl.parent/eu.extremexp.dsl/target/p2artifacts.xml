@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?artifactRepository version='1.1.0'?>
 <artifacts size='1'>
-  <artifact classifier='osgi.bundle' id='eu.extremexp.dsl' version='1.0.0.202403252227'>
+  <artifact classifier='osgi.bundle' id='eu.extremexp.dsl' version='1.0.0.202403311951'>
     <properties size='6'>
-      <property name='artifact.size' value='284473'/>
-      <property name='download.size' value='284473'/>
+      <property name='artifact.size' value='299564'/>
+      <property name='download.size' value='299564'/>
       <property name='maven-groupId' value='eu.extremexp.dsl'/>
       <property name='maven-artifactId' value='eu.extremexp.dsl'/>
       <property name='maven-version' value='1.0.0-SNAPSHOT'/>

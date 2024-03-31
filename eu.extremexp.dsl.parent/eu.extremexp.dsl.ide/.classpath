@@ -3,14 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="src-gen"/>
 	<classpathentry kind="src" path="xtend-gen"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="C:/Users/Milad/.p2/pool/plugins/org.eclipse.lsp4j.jsonrpc_0.22.0.v20240213-2011.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Milad/.p2/pool/plugins/org.eclipse.lsp4j_0.22.0.v20240213-2011.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Milad/.p2/pool/plugins/com.google.gson_2.10.1.v20230109-0753.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk-20"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

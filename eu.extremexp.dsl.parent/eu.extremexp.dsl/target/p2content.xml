@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <units size='1'>
-  <unit id='eu.extremexp.dsl' version='1.0.0.202403252227' generation='2'>
-    <update id='eu.extremexp.dsl' range='[0.0.0,1.0.0.202403252227)' severity='0'/>
+  <unit id='eu.extremexp.dsl' version='1.0.0.202403311951' generation='2'>
+    <update id='eu.extremexp.dsl' range='[0.0.0,1.0.0.202403311951)' severity='0'/>
     <properties size='6'>
       <property name='org.eclipse.equinox.p2.name' value='eu.extremexp.dsl'/>
       <property name='org.eclipse.equinox.p2.provider' value='My Company'/>
@@ -11,8 +11,8 @@
       <property name='maven-type' value='eclipse-plugin'/>
     </properties>
     <provides size='15'>
-      <provided namespace='org.eclipse.equinox.p2.iu' name='eu.extremexp.dsl' version='1.0.0.202403252227'/>
-      <provided namespace='osgi.bundle' name='eu.extremexp.dsl' version='1.0.0.202403252227'/>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='eu.extremexp.dsl' version='1.0.0.202403311951'/>
+      <provided namespace='osgi.bundle' name='eu.extremexp.dsl' version='1.0.0.202403311951'/>
       <provided namespace='java.package' name='eu.extremexp.dsl.language.impl' version='0.0.0'/>
       <provided namespace='java.package' name='eu.extremexp.dsl' version='0.0.0'/>
       <provided namespace='java.package' name='eu.extremexp.dsl.validation' version='0.0.0'/>
@@ -24,7 +24,7 @@
       <provided namespace='java.package' name='eu.extremexp.dsl.language' version='0.0.0'/>
       <provided namespace='java.package' name='eu.extremexp.dsl.language.util' version='0.0.0'/>
       <provided namespace='java.package' name='eu.extremexp.dsl.serializer' version='0.0.0'/>
-      <provided namespace='osgi.identity' name='eu.extremexp.dsl' version='1.0.0.202403252227'>
+      <provided namespace='osgi.identity' name='eu.extremexp.dsl' version='1.0.0.202403311951'>
         <properties size='1'>
           <property name='type' value='osgi.bundle'/>
         </properties>
@@ -49,13 +49,13 @@
       </requiredProperties>
     </requires>
     <artifacts size='1'>
-      <artifact classifier='osgi.bundle' id='eu.extremexp.dsl' version='1.0.0.202403252227'/>
+      <artifact classifier='osgi.bundle' id='eu.extremexp.dsl' version='1.0.0.202403311951'/>
     </artifacts>
     <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
     <touchpointData size='1'>
       <instructions size='1'>
         <instruction key='manifest'>
-          Bundle-SymbolicName: eu.extremexp.dsl; singleton:=true&#xA;Bundle-Version: 1.0.0.202403252227&#xA;
+          Bundle-SymbolicName: eu.extremexp.dsl; singleton:=true&#xA;Bundle-Version: 1.0.0.202403311951&#xA;
         </instruction>
       </instructions>
     </touchpointData>

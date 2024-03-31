@@ -9,8 +9,7 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.extremexp.dsl,
  org.eclipse.xtext.ide,
  org.eclipse.xtext.xbase.ide,
- org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
- org.eclipse.lsp4e;bundle-version="0.18.6"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-RequiredExecutionEnvironment: JavaSE-20
 Export-Package: eu.extremexp.dsl.ide.contentassist.antlr.internal,
  eu.extremexp.dsl.ide.contentassist.antlr
