@@ -27,9 +27,11 @@ WORKDIR /opt/extremexp-dsl-framework/eu.extremexp.dsl.parent
 RUN mvn clean install
 
 RUN mkdir /opt/log
-RUN mkdir /home/user
+RUN useradd -m -s /bin/bash user && \
+    echo "user:password" | chpasswd && \
+    mkdir -p /home/user/workspace
 
 EXPOSE 5007
 
-CMD ["bash", "-c", "/opt/extremexp-dsl-framework/launch.sh 2>/opt/log/erros.log >/opt/log/access.log"]
+CMD ["bash", "-c", "/opt/extremexp-dsl-framework/launch.sh 2>/opt/logs/erros.log >/opt/logs/access.log"]
 
