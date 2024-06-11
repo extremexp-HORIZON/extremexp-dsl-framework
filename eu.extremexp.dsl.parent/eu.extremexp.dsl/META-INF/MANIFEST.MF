@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: eu.extremexp.dsl
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl
-Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: ExtremeXP
+Bundle-Version: 1.0.0
 Bundle-SymbolicName: eu.extremexp.dsl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.emf.common,
  org.eclipse.xtend.lib;bundle-version="2.14.0",
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
-Bundle-RequiredExecutionEnvironment: JavaSE-20
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: eu.extremexp.dsl.language.impl,
  eu.extremexp.dsl,
  eu.extremexp.dsl.validation,
