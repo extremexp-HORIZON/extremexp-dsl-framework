@@ -28,6 +28,9 @@ COPY . /opt/extremexp-dsl-framework
 WORKDIR /opt/extremexp-dsl-framework/eu.extremexp.dsl.parent
 RUN mvn clean install
 
+WORKDIR /opt/extremexp-dsl-framework/eu.extremexp.dsl.parent/eu.extremexp.dsl.ide
+RUN mvn install -Plang-server
+
 RUN mkdir /opt/log
 
 # one trick is to use same user name with the code-server to find the files
