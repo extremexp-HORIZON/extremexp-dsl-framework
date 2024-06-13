@@ -3,8 +3,8 @@
 <plugin>
 	<extension point="org.eclipse.emf.ecore.generated_package">
 		<package
-			uri = "http://www.extremexp.eu/dsl/Language"
-			class = "eu.extremexp.dsl.language.LanguagePackage"
-			genModel = "model/generated/Language.genmodel" />
+			uri = "http://www.extremexp.eu/dsl/XDSL"
+			class = "eu.extremexp.dsl.xDSL.XDSLPackage"
+			genModel = "model/generated/XDSL.genmodel" />
 	</extension>
 </plugin>
