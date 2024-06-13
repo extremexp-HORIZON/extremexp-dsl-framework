@@ -13,7 +13,7 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<!-- Tycho settings -->
-		<tycho-version>3.0.5</tycho-version>
+		<tycho-version>4.0.8</tycho-version>
 		<!-- Define overridable properties for tycho-surefire-plugin -->
 		<platformSystemProperties></platformSystemProperties>
 		<moduleProperties></moduleProperties>
@@ -296,9 +296,15 @@
 
 	<dependencies>
 		<dependency>
-		    <groupId>com.google.code.gson</groupId>
-		    <artifactId>gson</artifactId>
-		    <version>2.11.0</version>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.ide</artifactId>
+			<version>${xtextVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.lsp4j</groupId>
+					<artifactId>org.eclipse.lsp4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>
