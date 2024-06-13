@@ -3,7 +3,7 @@ Automatic-Module-Name: eu.extremexp.dsl.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl.tests
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.202406130833
+Bundle-Version: 1.0.0.202406131222
 Bundle-SymbolicName: eu.extremexp.dsl.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.extremexp.dsl,org.eclipse.xtext.testing,org.eclipse.x
