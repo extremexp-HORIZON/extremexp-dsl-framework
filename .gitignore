@@ -31,8 +31,8 @@ generated/
 xtend-gen/
 
 # eclipse and mvn files
-*/target/%
-*/.project
-*/.settings
-*/.classpath
+*/target/*
+*.project
+*.settings
+*.classpath
 
