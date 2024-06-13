@@ -4,17 +4,17 @@
 package eu.extremexp.dsl.ide
 
 import com.google.inject.Guice
-import eu.extremexp.dsl.LanguageRuntimeModule
-import eu.extremexp.dsl.LanguageStandaloneSetup
+import eu.extremexp.dsl.XDSLRuntimeModule
+import eu.extremexp.dsl.XDSLStandaloneSetup
 import org.eclipse.xtext.util.Modules2
 
 /**
  * Initialization support for running Xtext languages as language servers.
  */
-class LanguageIdeSetup extends LanguageStandaloneSetup {
+class XDSLIdeSetup extends XDSLStandaloneSetup {
 
 	override createInjector() {
-		Guice.createInjector(Modules2.mixin(new LanguageRuntimeModule, new LanguageIdeModule))
+		Guice.createInjector(Modules2.mixin(new XDSLRuntimeModule, new XDSLIdeModule))
 	}
 	
 }

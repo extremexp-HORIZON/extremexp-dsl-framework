@@ -4,48 +4,48 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
 			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
 			default="true"
 			extensions="xxp"
-			id="eu.extremexp.dsl.Language"
-			name="Language Editor">
+			id="eu.extremexp.dsl.XDSL"
+			name="XDSL Editor">
 		</editor>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
 			commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
 			<activeWhen>
 				<reference
-					definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
-			commandId="eu.extremexp.dsl.Language.validate">
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+			commandId="eu.extremexp.dsl.XDSL.validate">
 			<activeWhen>
 				<reference
-					definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
 		<!-- copy qualified name -->
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
 			<activeWhen>
-				<reference definitionId="eu.extremexp.dsl.Language.Editor.opened" />
+				<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened" />
 			</activeWhen>
 		</handler>
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName">
 			<activeWhen>
 				<and>
-					<reference definitionId="eu.extremexp.dsl.Language.XtextEditor.opened" />
+					<reference definitionId="eu.extremexp.dsl.XDSL.XtextEditor.opened" />
 					<iterate>
 						<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 					</iterate>
@@ -54,22 +54,22 @@
 		</handler>
 	</extension>
 	<extension point="org.eclipse.core.expressions.definitions">
-		<definition id="eu.extremexp.dsl.Language.Editor.opened">
+		<definition id="eu.extremexp.dsl.XDSL.Editor.opened">
 			<and>
 				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="eu.extremexp.dsl.Language"
+						value="eu.extremexp.dsl.XDSL"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
 		</definition>
-		<definition id="eu.extremexp.dsl.Language.XtextEditor.opened">
+		<definition id="eu.extremexp.dsl.XDSL.XtextEditor.opened">
 			<and>
 				<reference definitionId="isXtextEditorActive"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="eu.extremexp.dsl.Language"
+						value="eu.extremexp.dsl.XDSL"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
@@ -78,33 +78,33 @@
 	<extension
 			point="org.eclipse.ui.preferencePages">
 		<page
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="eu.extremexp.dsl.Language"
-			name="Language">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="eu.extremexp.dsl.XDSL"
+			name="XDSL">
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
-			id="eu.extremexp.dsl.Language.coloring"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+			id="eu.extremexp.dsl.XDSL.coloring"
 			name="Syntax Coloring">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
-			id="eu.extremexp.dsl.Language.templates"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+			id="eu.extremexp.dsl.XDSL.templates"
 			name="Templates">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 	</extension>
 	<extension
 			point="org.eclipse.ui.propertyPages">
 		<page
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="eu.extremexp.dsl.Language"
-			name="Language">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="eu.extremexp.dsl.XDSL"
+			name="XDSL">
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -114,14 +114,14 @@
 	<extension
 		point="org.eclipse.ui.keywords">
 		<keyword
-			id="eu.extremexp.dsl.ui.keyword_Language"
-			label="Language"/>
+			id="eu.extremexp.dsl.ui.keyword_XDSL"
+			label="XDSL"/>
 	</extension>
 	<extension
 		point="org.eclipse.ui.commands">
 		<command
 			description="Trigger expensive validation"
-			id="eu.extremexp.dsl.Language.validate"
+			id="eu.extremexp.dsl.XDSL.validate"
 			name="Validate">
 		</command>
 		<!-- copy qualified name -->
@@ -142,12 +142,12 @@
 		<menuContribution
 			locationURI="popup:#TextEditorContext?after=group.edit">
 			<command
-				commandId="eu.extremexp.dsl.Language.validate"
+				commandId="eu.extremexp.dsl.XDSL.validate"
 				style="push"
 				tooltip="Trigger expensive validation">
 				<visibleWhen checkEnabled="false">
 					<reference
-						definitionId="eu.extremexp.dsl.Language.Editor.opened">
+						definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -157,7 +157,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="eu.extremexp.dsl.Language.Editor.opened" />
+					<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -165,7 +165,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="eu.extremexp.dsl.Language.Editor.opened" />
+					<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -174,7 +174,7 @@
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<and>
-						<reference definitionId="eu.extremexp.dsl.Language.XtextEditor.opened" />
+						<reference definitionId="eu.extremexp.dsl.XDSL.XtextEditor.opened" />
 						<iterate>
 							<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 						</iterate>
@@ -187,7 +187,7 @@
 		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
 			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -195,11 +195,11 @@
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
 			commandId="org.eclipse.xtext.ui.editor.FindReferences">
 			<activeWhen>
 				<reference
-					definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -208,8 +208,8 @@
 		<content-type
 			base-type="org.eclipse.core.runtime.text"
 			file-extensions="xxp"
-			id="eu.extremexp.dsl.Language.contenttype"
-			name="Language File"
+			id="eu.extremexp.dsl.XDSL.contenttype"
+			name="XDSL File"
 			priority="normal">
 		</content-type>
 	</extension>
@@ -217,68 +217,68 @@
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="xxp">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 			uriExtension="xxp">
 		</resourceServiceProvider>
 	</extension>
-	<!-- marker definitions for eu.extremexp.dsl.Language -->
+	<!-- marker definitions for eu.extremexp.dsl.XDSL -->
 	<extension
-			id="language.check.fast"
-			name="Language Problem"
+			id="xdsl.check.fast"
+			name="XDSL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.fast"/>
 		<persistent value="true"/>
 	</extension>
 	<extension
-			id="language.check.normal"
-			name="Language Problem"
+			id="xdsl.check.normal"
+			name="XDSL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.normal"/>
 		<persistent value="true"/>
 	</extension>
 	<extension
-			id="language.check.expensive"
-			name="Language Problem"
+			id="xdsl.check.expensive"
+			name="XDSL Problem"
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.expensive"/>
 		<persistent value="true"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
-			id="eu.extremexp.dsl.Language.validator.preferencePage"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
+			id="eu.extremexp.dsl.XDSL.validator.preferencePage"
 			name="Errors/Warnings">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
 			fileExtensions="xxp"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="eu.extremexp.dsl.Language.compiler.preferencePage"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="eu.extremexp.dsl.XDSL.compiler.preferencePage"
 			name="Compiler">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.ui.propertyPages">
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="eu.extremexp.dsl.Language.compiler.propertyPage"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="eu.extremexp.dsl.XDSL.compiler.propertyPage"
 			name="Compiler">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -289,20 +289,20 @@
 		<menuContribution locationURI="popup:#TextEditorContext?after=xtext.ui.openDeclaration">
 			<command
 				commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand"
-				id="eu.extremexp.dsl.Language.OpenGeneratedCode"
+				id="eu.extremexp.dsl.XDSL.OpenGeneratedCode"
 				style="push">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="eu.extremexp.dsl.Language.Editor.opened" />
+					<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
 			commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand">
 			<activeWhen>
-				<reference definitionId="eu.extremexp.dsl.Language.Editor.opened" />
+				<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened" />
 			</activeWhen>
 		</handler>
 	</extension>
@@ -310,11 +310,11 @@
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
 				<reference
-					definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -334,33 +334,33 @@
 				style="push"
 				tooltip="Open Quick Outline">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="eu.extremexp.dsl.Language.Editor.opened"/>
+					<reference definitionId="eu.extremexp.dsl.XDSL.Editor.opened"/>
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
-	<!-- quickfix marker resolution generator for eu.extremexp.dsl.Language -->
+	<!-- quickfix marker resolution generator for eu.extremexp.dsl.XDSL -->
 	<extension
 			point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-			markerType="eu.extremexp.dsl.ui.language.check.fast">
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="eu.extremexp.dsl.ui.xdsl.check.fast">
 			<attribute
 				name="FIXABLE_KEY"
 				value="true">
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-			markerType="eu.extremexp.dsl.ui.language.check.normal">
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="eu.extremexp.dsl.ui.xdsl.check.normal">
 			<attribute
 				name="FIXABLE_KEY"
 				value="true">
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-			markerType="eu.extremexp.dsl.ui.language.check.expensive">
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			markerType="eu.extremexp.dsl.ui.xdsl.check.expensive">
 			<attribute
 				name="FIXABLE_KEY"
 				value="true">
@@ -370,11 +370,11 @@
 	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
 			commandId="org.eclipse.xtext.ui.refactoring.RenameElement">
 			<activeWhen>
 				<reference
-					definitionId="eu.extremexp.dsl.Language.Editor.opened">
+					definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -386,7 +386,7 @@
 				style="push">
 				<visibleWhen checkEnabled="false">
 					<reference
-						definitionId="eu.extremexp.dsl.Language.Editor.opened">
+						definitionId="eu.extremexp.dsl.XDSL.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -394,34 +394,34 @@
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="eu.extremexp.dsl.Language"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
-			id="eu.extremexp.dsl.Language.refactoring"
+			category="eu.extremexp.dsl.XDSL"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
+			id="eu.extremexp.dsl.XDSL.refactoring"
 			name="Refactoring">
-			<keywordReference id="eu.extremexp.dsl.ui.keyword_Language"/>
+			<keywordReference id="eu.extremexp.dsl.ui.keyword_XDSL"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.compare.contentViewers">
-		<viewer id="eu.extremexp.dsl.Language.compare.contentViewers"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+		<viewer id="eu.extremexp.dsl.XDSL.compare.contentViewers"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="xxp">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="eu.extremexp.dsl.Language.contenttype"
-			contentViewerId="eu.extremexp.dsl.Language.compare.contentViewers" />
+			contentTypeId="eu.extremexp.dsl.XDSL.contenttype"
+			contentViewerId="eu.extremexp.dsl.XDSL.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
-		<viewer id="eu.extremexp.dsl.Language.compare.contentMergeViewers"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-			extensions="xxp" label="Language Compare">
+		<viewer id="eu.extremexp.dsl.XDSL.compare.contentMergeViewers"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+			extensions="xxp" label="XDSL Compare">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="eu.extremexp.dsl.Language.contenttype"
-			contentMergeViewerId="eu.extremexp.dsl.Language.compare.contentMergeViewers" />
+			contentTypeId="eu.extremexp.dsl.XDSL.contenttype"
+			contentMergeViewerId="eu.extremexp.dsl.XDSL.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
-		<provider id="eu.extremexp.dsl.Language.editors.documentProviders"
-			class="eu.extremexp.dsl.ui.LanguageExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
+		<provider id="eu.extremexp.dsl.XDSL.editors.documentProviders"
+			class="eu.extremexp.dsl.ui.XDSLExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
 			extensions="xxp">
 		</provider>
 	</extension>

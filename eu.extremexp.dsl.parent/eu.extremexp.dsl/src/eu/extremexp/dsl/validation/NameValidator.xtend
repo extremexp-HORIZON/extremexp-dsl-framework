@@ -1,15 +1,15 @@
 package eu.extremexp.dsl.validation
 
 import org.eclipse.xtext.validation.Check
-import eu.extremexp.dsl.language.LanguagePackage
-import eu.extremexp.dsl.language.WorkflowInterface
-import eu.extremexp.dsl.language.Workflow
-import eu.extremexp.dsl.language.Namespace
-import eu.extremexp.dsl.language.NamedElement
+import eu.extremexp.dsl.xDSL.XDSLPackage
+import eu.extremexp.dsl.xDSL.WorkflowInterface
+import eu.extremexp.dsl.xDSL.Workflow
+import eu.extremexp.dsl.xDSL.Namespace
+import eu.extremexp.dsl.xDSL.NamedElement
 
 // import eu.extremexp.dsl.language.LanguagePackage 
 
-class NameValidator extends AbstractLanguageValidator{
+class NameValidator extends AbstractXDSLValidator{
 	public static val INVALID_NAME = 'invalidName'
 	 
 	/*
@@ -22,7 +22,7 @@ class NameValidator extends AbstractLanguageValidator{
 		if (wf.name + "." + resource.URI.fileExtension != 
 			resource.URI.segment(resource.URI.segmentCount -1)){
 				error("Workflow should be named as the filename ", 
-						LanguagePackage.Literals.WORKFLOW_INTERFACE__NAME,
+						XDSLPackage.Literals.WORKFLOW_INTERFACE__NAME,
 						INVALID_NAME)				
 			}
 	}
@@ -36,7 +36,7 @@ class NameValidator extends AbstractLanguageValidator{
 		for (_wf : namespace.workflows){
 			if (_wf !== wf && _wf.name == wf.name){
 				error("Another Worfklow with name " + wf.name + " exists in "+ namespace.name, 
-						LanguagePackage.Literals.WORKFLOW_INTERFACE__NAME,
+						XDSLPackage.Literals.WORKFLOW_INTERFACE__NAME,
 						INVALID_NAME)				
 			}
 		}
@@ -55,7 +55,7 @@ class NameValidator extends AbstractLanguageValidator{
 			for (element : elements){
 				if (element !== ne && element.name == ne.name){
 					error("Another " + element.eClass.name + " with name " + element.name + " exists in "+ workflow.name, 
-							LanguagePackage.Literals.NAMED_ELEMENT__NAME,
+							XDSLPackage.Literals.NAMED_ELEMENT__NAME,
 							INVALID_NAME)				
 				}
 			}

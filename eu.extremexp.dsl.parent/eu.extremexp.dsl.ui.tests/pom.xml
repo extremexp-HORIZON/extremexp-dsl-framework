@@ -6,14 +6,21 @@
 		<artifactId>eu.extremexp.dsl.parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>eu.extremexp.dsl.ui</artifactId>
-	<packaging>eclipse-plugin</packaging>
+	<artifactId>eu.extremexp.dsl.ui.tests</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<configuration>
+					<useUIHarness>true</useUIHarness>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

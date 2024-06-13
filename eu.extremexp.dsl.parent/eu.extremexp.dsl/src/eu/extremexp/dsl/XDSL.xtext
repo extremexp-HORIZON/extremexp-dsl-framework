@@ -1,7 +1,6 @@
-grammar eu.extremexp.dsl.Language with org.eclipse.xtext.common.Terminals
+grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 
-generate language "http://www.extremexp.eu/dsl/Language"
-
+generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 
 Model:
@@ -42,7 +41,7 @@ Namespace:
 
 
 NamedElement:
-	{Task}|{Data}|{Param}
+	{Task}|{Data}|{Param}|{Metric}
 ;
 
 /*
@@ -84,6 +83,7 @@ Workflow:
 			conditionalLinks += ConditionalLink		|
 			exceptionalLinks += ExceptionalLink		|
 			groups += Group							|
+			metrics += Metric						|
 			params += Param
 		)*
 		
@@ -103,6 +103,7 @@ Workflow:
  		(
 			taskConfigurations += TaskConfiguration	|
 			dataConfigurations += DataConfiguration	|
+			metrics += Metric						|
 			paramSets += ParamSet
  		)*
  	'}'
@@ -140,7 +141,8 @@ TaskConfiguration:
 		(
 			innerTaskConfigurations+= TaskConfiguration		|
 			innerDataConfigurations+= DataConfiguration		|
-			params += Param		|
+			params += Param									|
+			outputs += OutputMetric							|
 			data += Data
 		)* 
 			
@@ -148,6 +150,22 @@ TaskConfiguration:
 ;
 
 /////////////////////////////////////// Task END ///////////////////////////////////////
+
+/////////////////////////////////////// Metric BEGIN ///////////////////////////////////////
+
+MetricType:
+	'blob' | 'primitive' | 'series' | 'structure' | 'field'
+;
+
+Metric: 
+	'define' 'metric' name=ID ('as' type=MetricType)? ';'
+;
+
+OutputMetric:
+	'generates' metric=[Metric] ';'
+;
+
+/////////////////////////////////////// Metric END ///////////////////////////////////////
 
 /////////////////////////////////////// Param BEGIN ///////////////////////////////////////
 
@@ -400,3 +418,5 @@ Group:
 ;
 
 ///////////////////////////////////// Group End ///////////////////////////////////////
+
+

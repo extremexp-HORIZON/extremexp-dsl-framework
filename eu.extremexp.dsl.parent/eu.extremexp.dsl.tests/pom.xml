@@ -6,8 +6,8 @@
 		<artifactId>eu.extremexp.dsl.parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>eu.extremexp.dsl.ui</artifactId>
-	<packaging>eclipse-plugin</packaging>
+	<artifactId>eu.extremexp.dsl.tests</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
 
 	<build>
 		<plugins>

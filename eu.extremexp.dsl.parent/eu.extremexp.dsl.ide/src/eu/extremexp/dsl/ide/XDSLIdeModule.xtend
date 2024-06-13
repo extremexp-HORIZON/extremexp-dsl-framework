@@ -7,5 +7,5 @@ package eu.extremexp.dsl.ide
 /**
  * Use this class to register ide components.
  */
-class LanguageIdeModule extends AbstractLanguageIdeModule {
+class XDSLIdeModule extends AbstractXDSLIdeModule {
 }

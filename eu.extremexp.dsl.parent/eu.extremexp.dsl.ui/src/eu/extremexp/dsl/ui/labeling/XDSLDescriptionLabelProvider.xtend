@@ -10,7 +10,7 @@ import org.eclipse.xtext.ui.label.DefaultDescriptionLabelProvider
  * 
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#label-provider
  */
-class LanguageDescriptionLabelProvider extends DefaultDescriptionLabelProvider {
+class XDSLDescriptionLabelProvider extends DefaultDescriptionLabelProvider {
 
 	// Labels and icons can be computed like this:
 	

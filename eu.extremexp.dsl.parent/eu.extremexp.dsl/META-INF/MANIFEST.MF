@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: eu.extremexp.dsl
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl
-Bundle-Vendor: ExtremeXP
-Bundle-Version: 1.0.0
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: eu.extremexp.dsl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
@@ -16,15 +16,15 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib;bundle-version="2.14.0",
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: eu.extremexp.dsl.language.impl,
- eu.extremexp.dsl,
+Export-Package: eu.extremexp.dsl,
  eu.extremexp.dsl.validation,
  eu.extremexp.dsl.scoping,
  eu.extremexp.dsl.parser.antlr.internal,
  eu.extremexp.dsl.services,
+ eu.extremexp.dsl.xDSL,
  eu.extremexp.dsl.parser.antlr,
+ eu.extremexp.dsl.xDSL.impl,
  eu.extremexp.dsl.generator,
- eu.extremexp.dsl.language,
- eu.extremexp.dsl.language.util,
+ eu.extremexp.dsl.xDSL.util,
  eu.extremexp.dsl.serializer
 Import-Package: org.apache.log4j

@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Automatic-Module-Name: eu.extremexp.dsl.ide
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl.ide
-Bundle-Vendor: ExtremeXP
-Bundle-Version: 1.0.0
-Bundle-SymbolicName: eu.extremexp.dsl.ide; singleton:=true
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: eu.extremexp.dsl.ide
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.extremexp.dsl,
  org.eclipse.xtext.ide,

@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.extremexp.dsl</groupId>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<artifactId>eu.extremexp.dsl.parent</artifactId>
 	<packaging>pom</packaging>
 
@@ -23,7 +23,10 @@
 	<modules>
 		<module>eu.extremexp.dsl</module>
 		<module>eu.extremexp.dsl.ide</module>
+		<module>eu.extremexp.dsl.ui</module>
 		<module>eu.extremexp.dsl.target</module>
+		<module>eu.extremexp.dsl.tests</module>
+		<module>eu.extremexp.dsl.ui.tests</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -117,7 +120,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.2.0</version>
 					<configuration>
 						<filesets>
 							<fileset>
@@ -292,5 +295,16 @@
 	</profiles>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.ide</artifactId>
+			<version>${xtextVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.lsp4j</groupId>
+					<artifactId>org.eclipse.lsp4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 </project>
