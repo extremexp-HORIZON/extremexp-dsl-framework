@@ -7,9 +7,9 @@ package eu.extremexp.dsl
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */
-class LanguageStandaloneSetup extends LanguageStandaloneSetupGenerated {
+class XDSLStandaloneSetup extends XDSLStandaloneSetupGenerated {
 
 	def static void doSetup() {
-		new LanguageStandaloneSetup().createInjectorAndDoEMFRegistration()
+		new XDSLStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
 }

@@ -6,15 +6,15 @@ package eu.extremexp.dsl.scoping
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.Scopes
-import eu.extremexp.dsl.language.WorkflowInterface
+import eu.extremexp.dsl.xDSL.WorkflowInterface
 import org.eclipse.xtext.EcoreUtil2
-import eu.extremexp.dsl.language.AssembledWorkflow
-import eu.extremexp.dsl.language.Workflow
-import eu.extremexp.dsl.language.TaskConfiguration
-import eu.extremexp.dsl.language.LanguagePackage
-import eu.extremexp.dsl.language.Namespace
-import eu.extremexp.dsl.language.ParamSet
-import eu.extremexp.dsl.language.Param
+import eu.extremexp.dsl.xDSL.AssembledWorkflow
+import eu.extremexp.dsl.xDSL.Workflow
+import eu.extremexp.dsl.xDSL.TaskConfiguration
+import eu.extremexp.dsl.xDSL.XDSLPackage
+import eu.extremexp.dsl.xDSL.Namespace
+import eu.extremexp.dsl.xDSL.ParamSet
+import eu.extremexp.dsl.xDSL.Param
 
 /**
  * This class contains custom scoping description.
@@ -25,7 +25,7 @@ import eu.extremexp.dsl.language.Param
  
 
  
-class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
+class XDSLScopeProvider extends AbstractXDSLScopeProvider  {
 
 
 	def Namespace findOriginalNamespace(EObject context){
@@ -71,6 +71,19 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
 		return null
 	}
 	
+	def findAllMetricsVisibleToTaskConfigurations(EObject context){
+		val metrics = newArrayList
+		var container = context.eContainer
+		while (container!=null){
+			if (container instanceof Workflow){
+				metrics += container.metrics
+			}
+			container = container.eContainer
+		}
+		return metrics
+	}
+	
+	
 	
 	def findAllParamsVisibleToTaskConfigurations(EObject context){
 		val params = newArrayList
@@ -89,8 +102,8 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
 		/*
 		 * Find only Workflows within same Namespace
 		 */
-		if (reference == LanguagePackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW
-			|| reference == LanguagePackage.Literals.IMPLEMENTATION__WORKFLOW){
+		if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW
+			|| reference == XDSLPackage.Literals.IMPLEMENTATION__WORKFLOW){
         	val found = super.getScope(context, reference)
 
         	if (found != null){
@@ -131,7 +144,7 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
          * 3- TODO bring only data that are not yet configured
          */
         
-        if (reference == LanguagePackage.Literals.TASK_CONFIGURATION__TASK){
+        if (reference == XDSLPackage.Literals.TASK_CONFIGURATION__TASK){
  
     		// 1- find the original workflow
     		val tasks = newArrayList
@@ -160,8 +173,8 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
          * 3- TODO bring only data that are not yet configured
          */
         
-        if (reference == LanguagePackage.Literals.DATA_CONFIGURATION__DATA ||
-        	reference == LanguagePackage.Literals.DATA__OTHER_DATA   ){
+        if (reference == XDSLPackage.Literals.DATA_CONFIGURATION__DATA ||
+        	reference == XDSLPackage.Literals.DATA__OTHER_DATA   ){
  
     		// 1- find the original workflow
     		val data = newArrayList
@@ -192,9 +205,9 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
          * 4- TODO bring only data that are not yet configured
          */
         
-        if (reference == LanguagePackage.Literals.PARAM__OTHER_PARAM  || 
-        	reference == LanguagePackage.Literals.PARAM_SET__OTHER_PARAM ||
-        	reference == LanguagePackage.Literals.PARAM_SET__PARAM ){
+        if (reference == XDSLPackage.Literals.PARAM__OTHER_PARAM  || 
+        	reference == XDSLPackage.Literals.PARAM_SET__OTHER_PARAM ||
+        	reference == XDSLPackage.Literals.PARAM_SET__PARAM ){
 
     		// 1- find the original workflow
     		val params = newArrayList
@@ -217,7 +230,29 @@ class LanguageScopeProvider extends AbstractLanguageScopeProvider  {
 	        return Scopes.scopeFor(params)      
         	
         }
-        
+        if (reference == XDSLPackage.Literals.METRIC ){
+
+    		// 1- find the original workflow
+    		val metrics = newArrayList
+	        // 2- find the implementation 
+			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
+	        if (workflow != null){        		
+	        	metrics += workflow.metrics
+	        }
+	        
+	        else{
+	        	
+        		workflow = findOriginalWorkflow(context)
+	        	if (workflow != null){        		
+		        	metrics += workflow.metrics
+		        }
+	        }
+	        
+	        metrics += findAllMetricsVisibleToTaskConfigurations(context)
+	        
+	        return Scopes.scopeFor(metrics)      
+        	
+        }
         
         return super.getScope(context, reference)
 	}

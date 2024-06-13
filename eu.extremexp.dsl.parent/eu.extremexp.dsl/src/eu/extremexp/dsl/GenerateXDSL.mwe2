@@ -1,4 +1,4 @@
-module eu.extremexp.dsl.GenerateLanguage
+module eu.extremexp.dsl.GenerateXDSL
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
@@ -12,7 +12,13 @@ Workflow {
 			project = StandardProjectConfig {
 				baseName = "eu.extremexp.dsl"
 				rootPath = rootPath
+				runtimeTest = {
+					enabled = true
+				}
 				eclipsePlugin = {
+					enabled = true
+				}
+				eclipsePluginTest = {
 					enabled = true
 				}
 				createEclipseMetaData = true
@@ -25,7 +31,7 @@ Workflow {
 			}
 		}
 		language = StandardLanguage {
-			name = "eu.extremexp.dsl.Language"
+			name = "eu.extremexp.dsl.XDSL"
 			fileExtensions = "xxp"
 
 			serializer = {

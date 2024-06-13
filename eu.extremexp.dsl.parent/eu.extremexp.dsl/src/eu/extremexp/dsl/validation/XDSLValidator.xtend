@@ -5,9 +5,9 @@ package eu.extremexp.dsl.validation
 
 
 
-import eu.extremexp.dsl.language.AssembledWorkflow
-import eu.extremexp.dsl.language.Workflow
-import eu.extremexp.dsl.language.LanguagePackage
+import eu.extremexp.dsl.xDSL.AssembledWorkflow
+import eu.extremexp.dsl.xDSL.Workflow
+import eu.extremexp.dsl.xDSL.XDSLPackage
 import org.eclipse.xtext.validation.Check
 
 /**
@@ -15,7 +15,7 @@ import org.eclipse.xtext.validation.Check
  *
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
-class LanguageValidator extends NameValidator {
+class XDSLValidator extends NameValidator {
 	
 	public static val INVALID_REFERENCE = 'invalidReference'
 	
@@ -29,7 +29,7 @@ class LanguageValidator extends NameValidator {
 	 	while (!(wf instanceof Workflow)){
 	 		if (wfMap.containsKey(wf)){
 	 			error("There exist a cyclic reference to the same workflow", 
-					LanguagePackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW,
+					XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW,
 					INVALID_REFERENCE)	
 				return
 	 		}
@@ -41,3 +41,4 @@ class LanguageValidator extends NameValidator {
 	 }
 	
 }
+
