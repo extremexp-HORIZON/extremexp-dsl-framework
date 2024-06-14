@@ -71,20 +71,6 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider  {
 		return null
 	}
 	
-	def findAllMetricsVisibleToTaskConfigurations(EObject context){
-		val metrics = newArrayList
-		var container = context.eContainer
-		while (container!=null){
-			if (container instanceof Workflow){
-				metrics += container.metrics
-			}
-			container = container.eContainer
-		}
-		return metrics
-	}
-	
-	
-	
 	def findAllParamsVisibleToTaskConfigurations(EObject context){
 		val params = newArrayList
 		var container = context.eContainer
@@ -230,30 +216,19 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider  {
 	        return Scopes.scopeFor(params)      
         	
         }
-        if (reference == XDSLPackage.Literals.METRIC ){
-
+        
+        if (reference == XDSLPackage.Literals.OUTPUT_METRIC__METRIC ){
     		// 1- find the original workflow
     		val metrics = newArrayList
 	        // 2- find the implementation 
-			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
+			var  workflow = findOriginalWorkflow(context.eContainer)
 	        if (workflow != null){        		
 	        	metrics += workflow.metrics
 	        }
 	        
-	        else{
-	        	
-        		workflow = findOriginalWorkflow(context)
-	        	if (workflow != null){        		
-		        	metrics += workflow.metrics
-		        }
-	        }
-	        
-	        metrics += findAllMetricsVisibleToTaskConfigurations(context)
-	        
-	        return Scopes.scopeFor(metrics)      
+	        return Scopes.scopeFor(metrics)       
         	
         }
-        
         return super.getScope(context, reference)
 	}
 }
