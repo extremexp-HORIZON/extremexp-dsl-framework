@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.Channels;
+import java.nio.channels.CompletionHandler;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,46 +17,75 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
+import org.eclipse.xtext.ide.server.ILanguageServerShutdownAndExitHandler;
 import org.eclipse.xtext.ide.server.ServerModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 /**
- * @author dietrich - Initial contribution and API
+ * Runner for the ExtremeXP DSL language server.
  */
 public class RunServer {
 
-	public static void main(String[] args) throws InterruptedException, IOException {
-			System.out.println("Welcome to XXP LSP version 4.0 - Resolved");
-			Injector injector = Guice.createInjector(new ServerModule());
-			LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);
-			Function<MessageConsumer, MessageConsumer> wrapper = consumer -> {
-				MessageConsumer result = consumer;
-				return result;
-			};
-			Launcher<LanguageClient> launcher = createSocketLauncher(languageServer, LanguageClient.class,
-					new InetSocketAddress("0.0.0.0", 5007), Executors.newCachedThreadPool(), wrapper);
-			languageServer.connect(launcher.getRemoteProxy());
-			Future<?> future = launcher.startListening();
-			while (!future.isDone()) {
-				Thread.sleep(10_000l);
-			}
-		}
+    private static class DSLServerModule extends ServerModule {
 
-		static <T> Launcher<T> createSocketLauncher(Object localService, Class<T> remoteInterface,
-				SocketAddress socketAddress, ExecutorService executorService,
-				Function<MessageConsumer, MessageConsumer> wrapper) throws IOException {
-			AsynchronousServerSocketChannel serverSocket = AsynchronousServerSocketChannel.open().bind(socketAddress);
-			AsynchronousSocketChannel socketChannel;
-			try {
-				socketChannel = serverSocket.accept().get();
-				return Launcher.createIoLauncher(localService, remoteInterface, Channels.newInputStream(socketChannel),
-						Channels.newOutputStream(socketChannel), executorService, wrapper);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
+        @Override
+        protected void configure() {
+            super.configure();
+            // Remove automated termination of the whole VM when the LangServer object losts a connection.
+            bind(ILanguageServerShutdownAndExitHandler.class).to(ILanguageServerShutdownAndExitHandler.NullImpl.class);
+        }
+    }
+
+    private static final int port = 5007;
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to XXP LSP version 4.0 - Resolved");
+        Injector injector = Guice.createInjector(new DSLServerModule());
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        Function<MessageConsumer, MessageConsumer> wrapper = consumer -> {
+            MessageConsumer result = consumer;
+            return result;
+        };
+
+        try (final AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port))) {
+            System.out.println("LSP listening on " + port);
+            server.accept(null, new CompletionHandler<AsynchronousSocketChannel, Object>() {
+                public void completed(AsynchronousSocketChannel socketChannel, Object att) {
+                    System.out.println("LSP has accepted a connection");
+                    server.accept(null, this);
+
+                    LanguageServerImpl languageServer = injector.getInstance(LanguageServerImpl.class);
+                    Launcher<LanguageClient> launcher = Launcher.createIoLauncher(languageServer, LanguageClient.class, Channels.newInputStream(socketChannel), Channels.newOutputStream(socketChannel), executorService, wrapper);
+                    languageServer.connect(launcher.getRemoteProxy());
+
+                    Future<?> future = launcher.startListening();
+                    while (!future.isDone()) {
+                        try {
+                            Thread.sleep(10_000L);
+                        } catch (InterruptedException ex) {
+                            System.out.println("InterruptedException");
+                        }
+                    }
+                    System.out.println("LSP connection termiated");
+                }
+
+                public void failed(Throwable exc, Object att) {
+                    System.out.println("LSP failed to accept a connection");
+                    exc.printStackTrace();
+                }
+            });
+
+            try {
+                Thread.sleep(Integer.MAX_VALUE); // main running forever
+            } catch (InterruptedException ignored) {
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+    }
 
 }
