@@ -16,29 +16,29 @@ import org.eclipse.xtext.validation.Check
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class XDSLValidator extends NameValidator {
-	
-	public static val INVALID_REFERENCE = 'invalidReference'
-	
-	/*
-	 * Check if the assembled workflow is not derived from itself (in a loop)
-	 */
-	 @Check
-	 def checkAssembledWorkflow(AssembledWorkflow aw){
-	 	var wfMap= newHashMap
-	 	var wf = aw.workflow
-	 	while (!(wf instanceof Workflow)){
-	 		if (wfMap.containsKey(wf)){
-	 			error("There exist a cyclic reference to the same workflow", 
-					XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW,
-					INVALID_REFERENCE)	
-				return
-	 		}
-	 		wfMap.put(wf, 1)
-	 		if (wf instanceof AssembledWorkflow){
-	 			wf = wf.workflow
-	 		}
-	 	}
-	 }
+//	
+//	public static val INVALID_REFERENCE = 'invalidReference'
+//	
+//	/*
+//	 * Check if the assembled workflow is not derived from itself (in a loop)
+//	 */
+//	 @Check
+//	 def checkAssembledWorkflow(AssembledWorkflow aw){
+//	 	var wfMap= newHashMap
+//	 	var wf = aw.workflow
+//	 	while (!(wf instanceof Workflow)){
+//	 		if (wfMap.containsKey(wf)){
+//	 			error("There exist a cyclic reference to the same workflow", 
+//					XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW,
+//					INVALID_REFERENCE)	
+//				return
+//	 		}
+//	 		wfMap.put(wf, 1)
+//	 		if (wf instanceof AssembledWorkflow){
+//	 			wf = wf.workflow
+//	 		}
+//	 	}
+//	 }
 	
 }
 
