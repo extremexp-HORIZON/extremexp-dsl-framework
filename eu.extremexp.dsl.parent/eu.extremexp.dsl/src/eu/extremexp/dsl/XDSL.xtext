@@ -3,7 +3,7 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 Root:
-	isPacakge?=ExperimentPackage //| isTask?=TaskPackage
+	isPacakge?=ExperimentPackage | isTask?=TaskPackage
 ;
 
 ExperimentPackage:
@@ -12,7 +12,7 @@ ExperimentPackage:
 ;
 
 Component:
-	Workflow | AssembledWorkflow //| Experiment
+	Workflow | AssembledWorkflow |  Experiment
 ;
 
 Workflow:
@@ -44,7 +44,7 @@ Data:
 ;
 
 Value:
-	STRING | INT | FLOAT | BOOL | NULL | ENUM | RANGE
+	STRING | INT | FLOAT | BOOL | NULL | ENUM | Range
 ;
 
 terminal FLOAT:
@@ -67,7 +67,7 @@ ENUM:
     'enum''(' values+=Text (',' values+=Text)* ')'
 ;
 
-RANGE:
+Range:
 	'range' '(' minimum=INT ',' maximum=INT (',' step=INT )? ')'
 ;
 Operator:
@@ -145,8 +145,8 @@ AssembledWorkflow:
 
 Experiment:
     'experiment' name=ID '{'
-    	('intent' intent=ID )?
-    	('control' control=Control)?
+    	('intent' intent=ID ';')?
+    	(control=Control)?
         (
         	spaces += Space 	|
         	events += Event
@@ -183,28 +183,41 @@ Strategy:
 
 
 Control:
-        'control' '{'
-               expNode=[ExperimentNode]';'
+        {Control} 'control' '{'
                expLink+=ExpLink*
         '}';
 
+
 ExpLink:  RegularExpLink | ConditionalExpLink;
 
-RegularExpLink:
-    initial_space='START' '->' start=[ExperimentNode] ';' |'START' '->' start=[ExperimentNode]  '->' 'END' ';' |
-
-    initial_space=[ExperimentNode]
-    '->'
-    (spaces=[ExperimentNode])+
-    ';' |
-
-    initial_space=[ExperimentNode]
-    '->'
-    (spaces=[ExperimentNode] '->')+
-    'END'
-    ';'
+ExpNode:
+	{Space} | {Event}
 ;
+
+RegularExpLink:
+	(started?='START' '->')?  
+	nodes+=[ExpNode] ('->' nodes+=[ExpNode])* 
+	(ended?='->' 'END')? ';'
+;
+
 
 ConditionalExpLink:
-    fromspace=[ExperimentNode] '?->' tospace=[ExperimentNode] '{' 'condition' condition=STRING '}' ';'
+    fromNode=[ExpNode] '?->' toNode=[ExpNode] '{' 'condition' condition=STRING '}' ';'
 ;
+
+TaskPackage:
+	'task' name=ID '{'
+        elements+=TaskElement*
+    '}'
+;
+
+TaskElement:  
+	Data | Implementation | Parameter
+;
+
+Parameter:
+    'param' name=ID '{'
+        'type' type=ID ';'
+        'default' default=INT ';'
+        range=Range ';'
+    '}';
