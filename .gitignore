@@ -30,9 +30,14 @@ src-gen/
 generated/
 xtend-gen/
 
+
+# all target code
+**/target/MANIFEST.MF
+
 # eclipse and mvn files
 **/target/
 *.project
 *.settings
 *.classpath
+
 

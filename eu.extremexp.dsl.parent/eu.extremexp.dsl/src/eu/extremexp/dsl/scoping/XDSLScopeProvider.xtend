@@ -27,208 +27,208 @@ import eu.extremexp.dsl.xDSL.Param
  
 class XDSLScopeProvider extends AbstractXDSLScopeProvider  {
 
-
-	def Namespace findOriginalNamespace(EObject context){
-		var container = context
-		while (!(container instanceof Namespace)){
-				container = container.eContainer
-		}
-		return container as Namespace
-			
-		
-	}
-
-	def Workflow findOriginalWorkflow(EObject context){
-		var container = context
-		while (container != null && !(container instanceof Workflow)){
-			if (container instanceof AssembledWorkflow){
-				container = container.workflow
-			}
-			else {
-				container = container.eContainer
-			}
-		}
-		
-		return container as Workflow
-	
-		
-	}
-	
-	def Workflow findFirstParentTaskConfigurationWithImplementedWorkflow (EObject context){
-		var container = context
-		while (container != null){
-			if (container instanceof TaskConfiguration){
-				if (container.implementation != null){
-					if (container.implementation.workflow instanceof WorkflowInterface){
-						return findOriginalWorkflow(container.implementation.workflow)
-					}
-				}
-			}
-			container = container.eContainer
-
-		}
-		
-		return null
-	}
-	
-	def findAllParamsVisibleToTaskConfigurations(EObject context){
-		val params = newArrayList
-		var container = context.eContainer
-		while (container!=null){
-			if (container instanceof TaskConfiguration){
-				params += container.params
-			}
-			container = container.eContainer
-		}
-		return params
-	}
-	
-	override getScope(EObject context, EReference reference){
-		
-		/*
-		 * Find only Workflows within same Namespace
-		 */
-		if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW
-			|| reference == XDSLPackage.Literals.IMPLEMENTATION__WORKFLOW){
-        	val found = super.getScope(context, reference)
-
-        	if (found != null){
-        		val resolvedWorkflows = newArrayList
-				found.allElements.forEach[ element |
-					val wf = element.EObjectOrProxy
-					// find the resolved workflows except itself
-					if (wf !== context){
-						if (wf.eIsProxy){
-							if (context.eResource.resourceSet != null){
-								
-								val createdWorkflow = EcoreUtil2.resolve(
-									wf, context.eResource.resourceSet)
-								
-								val createdNamespace = findOriginalNamespace(createdWorkflow)
-								val contextNamespace = findOriginalNamespace(context)
-								
-								// HACK, temporary solution until we introduce importedNamespaces
-								if (createdNamespace.name ==  contextNamespace.name){ 
-									resolvedWorkflows += createdWorkflow
-								}
-							}
-						}
-					}
-					else {
-						resolvedWorkflows += wf
-					}
-				]
-
-				return Scopes.scopeFor(resolvedWorkflows)
-        	}
-        
-        }
-        /*
-         * Find all the tasks there are :
-         * 1- first, check if we are in an implementation environment
-         * 2- if not, then check the tasks from original workflow
-         * 3- TODO bring only data that are not yet configured
-         */
-        
-        if (reference == XDSLPackage.Literals.TASK_CONFIGURATION__TASK){
- 
-    		// 1- find the original workflow
-    		val tasks = newArrayList
-	        // 2- find the implementation 
-			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
-	        if (workflow != null){        		
-	        	tasks += workflow.tasks
-	        }
-	        
-	        else{
-	        	
-        		workflow = findOriginalWorkflow(context)
-	        	if (workflow != null){        		
-		        	tasks += workflow.tasks
-		        }
-	        }
-	        
-	        return Scopes.scopeFor(tasks)      
-        	
-        }
-                
-        /*
-         * Find all the data there are :
-         * 1- first, check if we are in an implementation environment
-         * 2- if not, then check the data from original workflow
-         * 3- TODO bring only data that are not yet configured
-         */
-        
-        if (reference == XDSLPackage.Literals.DATA_CONFIGURATION__DATA ||
-        	reference == XDSLPackage.Literals.DATA__OTHER_DATA   ){
- 
-    		// 1- find the original workflow
-    		val data = newArrayList
-	        // 2- find the implementation 
-			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
-	        if (workflow != null){        		
-	        	data += workflow.data
-	        }
-	        
-	        else{
-	        	
-        		workflow = findOriginalWorkflow(context)
-	        	if (workflow != null){        		
-		        	data += workflow.data
-		        }
-	        }
-	        
-	        return Scopes.scopeFor(data)      
-        	
-        }
-        
-        
-        /*
-         * Find all the param there are :
-         * 1- first, check if we are in an implementation environment
-         * 2- if not, then check the param from original workflow
-         * 3- Also, find all params that are in all above configurations
-         * 4- TODO bring only data that are not yet configured
-         */
-        
-        if (reference == XDSLPackage.Literals.PARAM__OTHER_PARAM  || 
-        	reference == XDSLPackage.Literals.PARAM_SET__OTHER_PARAM ||
-        	reference == XDSLPackage.Literals.PARAM_SET__PARAM ){
-
-    		// 1- find the original workflow
-    		val params = newArrayList
-	        // 2- find the implementation 
-			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
-	        if (workflow != null){        		
-	        	params += workflow.params
-	        }
-	        
-	        else{
-	        	
-        		workflow = findOriginalWorkflow(context)
-	        	if (workflow != null){        		
-		        	params += workflow.params
-		        }
-	        }
-	        
-	        params += findAllParamsVisibleToTaskConfigurations(context)
-	        
-	        return Scopes.scopeFor(params)      
-        	
-        }
-        
-        if (reference == XDSLPackage.Literals.OUTPUT_METRIC__METRIC ){
-    		// 1- find the original workflow
-    		val metrics = newArrayList
-	        // 2- find the implementation 
-			var  workflow = findOriginalWorkflow(context.eContainer)
-	        if (workflow != null){        		
-	        	metrics += workflow.metrics
-	        }
-	        
-	        return Scopes.scopeFor(metrics)       
-        	
-        }
-        return super.getScope(context, reference)
-	}
+//
+//	def Namespace findOriginalNamespace(EObject context){
+//		var container = context
+//		while (!(container instanceof Namespace)){
+//				container = container.eContainer
+//		}
+//		return container as Namespace
+//			
+//		
+//	}
+//
+//	def Workflow findOriginalWorkflow(EObject context){
+//		var container = context
+//		while (container != null && !(container instanceof Workflow)){
+//			if (container instanceof AssembledWorkflow){
+//				container = container.workflow
+//			}
+//			else {
+//				container = container.eContainer
+//			}
+//		}
+//		
+//		return container as Workflow
+//	
+//		
+//	}
+//	
+//	def Workflow findFirstParentTaskConfigurationWithImplementedWorkflow (EObject context){
+//		var container = context
+//		while (container != null){
+//			if (container instanceof TaskConfiguration){
+//				if (container.implementation != null){
+//					if (container.implementation.workflow instanceof WorkflowInterface){
+//						return findOriginalWorkflow(container.implementation.workflow)
+//					}
+//				}
+//			}
+//			container = container.eContainer
+//
+//		}
+//		
+//		return null
+//	}
+//	
+//	def findAllParamsVisibleToTaskConfigurations(EObject context){
+//		val params = newArrayList
+//		var container = context.eContainer
+//		while (container!=null){
+//			if (container instanceof TaskConfiguration){
+//				params += container.params
+//			}
+//			container = container.eContainer
+//		}
+//		return params
+//	}
+//	
+//	override getScope(EObject context, EReference reference){
+//		
+//		/*
+//		 * Find only Workflows within same Namespace
+//		 */
+//		if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__WORKFLOW
+//			|| reference == XDSLPackage.Literals.IMPLEMENTATION__WORKFLOW){
+//        	val found = super.getScope(context, reference)
+//
+//        	if (found != null){
+//        		val resolvedWorkflows = newArrayList
+//				found.allElements.forEach[ element |
+//					val wf = element.EObjectOrProxy
+//					// find the resolved workflows except itself
+//					if (wf !== context){
+//						if (wf.eIsProxy){
+//							if (context.eResource.resourceSet != null){
+//								
+//								val createdWorkflow = EcoreUtil2.resolve(
+//									wf, context.eResource.resourceSet)
+//								
+//								val createdNamespace = findOriginalNamespace(createdWorkflow)
+//								val contextNamespace = findOriginalNamespace(context)
+//								
+//								// HACK, temporary solution until we introduce importedNamespaces
+//								if (createdNamespace.name ==  contextNamespace.name){ 
+//									resolvedWorkflows += createdWorkflow
+//								}
+//							}
+//						}
+//					}
+//					else {
+//						resolvedWorkflows += wf
+//					}
+//				]
+//
+//				return Scopes.scopeFor(resolvedWorkflows)
+//        	}
+//        
+//        }
+//        /*
+//         * Find all the tasks there are :
+//         * 1- first, check if we are in an implementation environment
+//         * 2- if not, then check the tasks from original workflow
+//         * 3- TODO bring only data that are not yet configured
+//         */
+//        
+//        if (reference == XDSLPackage.Literals.TASK_CONFIGURATION__TASK){
+// 
+//    		// 1- find the original workflow
+//    		val tasks = newArrayList
+//	        // 2- find the implementation 
+//			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
+//	        if (workflow != null){        		
+//	        	tasks += workflow.tasks
+//	        }
+//	        
+//	        else{
+//	        	
+//        		workflow = findOriginalWorkflow(context)
+//	        	if (workflow != null){        		
+//		        	tasks += workflow.tasks
+//		        }
+//	        }
+//	        
+//	        return Scopes.scopeFor(tasks)      
+//        	
+//        }
+//                
+//        /*
+//         * Find all the data there are :
+//         * 1- first, check if we are in an implementation environment
+//         * 2- if not, then check the data from original workflow
+//         * 3- TODO bring only data that are not yet configured
+//         */
+//        
+//        if (reference == XDSLPackage.Literals.DATA_CONFIGURATION__DATA ||
+//        	reference == XDSLPackage.Literals.DATA__OTHER_DATA   ){
+// 
+//    		// 1- find the original workflow
+//    		val data = newArrayList
+//	        // 2- find the implementation 
+//			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
+//	        if (workflow != null){        		
+//	        	data += workflow.data
+//	        }
+//	        
+//	        else{
+//	        	
+//        		workflow = findOriginalWorkflow(context)
+//	        	if (workflow != null){        		
+//		        	data += workflow.data
+//		        }
+//	        }
+//	        
+//	        return Scopes.scopeFor(data)      
+//        	
+//        }
+//        
+//        
+//        /*
+//         * Find all the param there are :
+//         * 1- first, check if we are in an implementation environment
+//         * 2- if not, then check the param from original workflow
+//         * 3- Also, find all params that are in all above configurations
+//         * 4- TODO bring only data that are not yet configured
+//         */
+//        
+//        if (reference == XDSLPackage.Literals.PARAM__OTHER_PARAM  || 
+//        	reference == XDSLPackage.Literals.PARAM_SET__OTHER_PARAM ||
+//        	reference == XDSLPackage.Literals.PARAM_SET__PARAM ){
+//
+//    		// 1- find the original workflow
+//    		val params = newArrayList
+//	        // 2- find the implementation 
+//			var  workflow = findFirstParentTaskConfigurationWithImplementedWorkflow(context.eContainer)
+//	        if (workflow != null){        		
+//	        	params += workflow.params
+//	        }
+//	        
+//	        else{
+//	        	
+//        		workflow = findOriginalWorkflow(context)
+//	        	if (workflow != null){        		
+//		        	params += workflow.params
+//		        }
+//	        }
+//	        
+//	        params += findAllParamsVisibleToTaskConfigurations(context)
+//	        
+//	        return Scopes.scopeFor(params)      
+//        	
+//        }
+//        
+//        if (reference == XDSLPackage.Literals.OUTPUT_METRIC__METRIC ){
+//    		// 1- find the original workflow
+//    		val metrics = newArrayList
+//	        // 2- find the implementation 
+//			var  workflow = findOriginalWorkflow(context.eContainer)
+//	        if (workflow != null){        		
+//	        	metrics += workflow.metrics
+//	        }
+//	        
+//	        return Scopes.scopeFor(metrics)       
+//        	
+//        }
+//        return super.getScope(context, reference)
+//	}
 }
