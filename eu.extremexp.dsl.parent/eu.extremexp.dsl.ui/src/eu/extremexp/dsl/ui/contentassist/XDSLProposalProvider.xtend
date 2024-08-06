@@ -3,24 +3,11 @@
  */
 package eu.extremexp.dsl.ui.contentassist
 
-import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import org.eclipse.xtext.Assignment
-import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
-import eu.extremexp.dsl.xDSL.Metric
-
 /**
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#content-assist
  * on how to customize the content assistant.
  */
 class XDSLProposalProvider extends AbstractXDSLProposalProvider {
 	
-	  def void completeMetric_Type(Metric metric, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-	  	
-      	 acceptor.accept(createCompletionProposal("blob", context));
-      	 acceptor.accept(createCompletionProposal("primitive", context));
-      	 acceptor.accept(createCompletionProposal("series", context));
-      	 acceptor.accept(createCompletionProposal("structure", context));
-      	 acceptor.accept(createCompletionProposal("field", context));
 
-    }
 }

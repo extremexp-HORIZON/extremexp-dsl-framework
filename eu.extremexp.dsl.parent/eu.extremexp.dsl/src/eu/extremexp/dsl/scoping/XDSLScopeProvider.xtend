@@ -3,26 +3,7 @@
  */
 package eu.extremexp.dsl.scoping
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EReference
-import org.eclipse.xtext.scoping.Scopes
-import eu.extremexp.dsl.xDSL.WorkflowInterface
-import org.eclipse.xtext.EcoreUtil2
-import eu.extremexp.dsl.xDSL.AssembledWorkflow
-import eu.extremexp.dsl.xDSL.Workflow
-import eu.extremexp.dsl.xDSL.TaskConfiguration
-import eu.extremexp.dsl.xDSL.XDSLPackage
-import eu.extremexp.dsl.xDSL.Namespace
-import eu.extremexp.dsl.xDSL.ParamSet
-import eu.extremexp.dsl.xDSL.Param
 
-/**
- * This class contains custom scoping description.
- * 
- * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
- * on how and when to use it.
- */
- 
 
  
 class XDSLScopeProvider extends AbstractXDSLScopeProvider  {

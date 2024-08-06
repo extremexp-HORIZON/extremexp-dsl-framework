@@ -1,11 +1,5 @@
 package eu.extremexp.dsl.validation
 
-import org.eclipse.xtext.validation.Check
-import eu.extremexp.dsl.xDSL.XDSLPackage
-import eu.extremexp.dsl.xDSL.WorkflowInterface
-import eu.extremexp.dsl.xDSL.Workflow
-import eu.extremexp.dsl.xDSL.Namespace
-import eu.extremexp.dsl.xDSL.NamedElement
 
 // import eu.extremexp.dsl.language.LanguagePackage 
 
