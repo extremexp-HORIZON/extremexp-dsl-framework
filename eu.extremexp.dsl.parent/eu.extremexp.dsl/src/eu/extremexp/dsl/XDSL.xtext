@@ -100,8 +100,8 @@ Param:
  		(assinged?='=' (value=Value | otherParam=[Param]))
  		| (set?='{'
  			'type' type=ID ';'
-	        'default' default=INT ';'
-	        range=Range ';'
+	        'default' default=Value ';'
+	        (range=Range ';')?
  		'}')
  	)? ';'
  ;
@@ -235,6 +235,7 @@ TaskPackage:
         (
         	data+=Data		|
         	implementations+=Implementation	|
+        	dependencies += Dependency		|
         	params+=Param
         )*
     '}'
