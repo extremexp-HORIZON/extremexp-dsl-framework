@@ -24,7 +24,9 @@ Workflow:
        		dataConfigs += DataConfig	|
        		taskConfigs += TaskConfig	|
        		nodeLinks += NodeLink		|
-       		dataLinks += DataLink
+       		dataLinks += DataLink		|
+       		metrics += Metric			|
+       		conditionalLinks += ConditionalLink
        	)*
     '}'
 ;
@@ -87,13 +89,21 @@ TaskConfig:
         	params += Param |
         	implementations += Implementation	|
         	dependencies += Dependency	|
-        	subTaskConfigs += TaskConfig
+        	subTaskConfigs += TaskConfig	|
+        	metrics += MetricGenerator	
         )*
     '}'
  ;
 
 Param:
- 	'param' name=ID (assinged?='=' (value=Value | otherParam=[Param]))? ';'
+ 	'param' name=ID (
+ 		(assinged?='=' (value=Value | otherParam=[Param]))
+ 		| (set?='{'
+ 			'type' type=ID ';'
+	        'default' default=INT ';'
+	        range=Range ';'
+ 		'}')
+ 	)? ';'
  ;
  
 Implementation:
@@ -130,8 +140,23 @@ DataLink:
 ;
 
 
-//ConditionLink: 
-//	fromNode=[Node] '->' condition=STRING '?' trueNode=[Node]  ':' falseNode=[Node] '->' continuationNode=[Node] ';'
+ConditionalLink: 
+fromNode=[Node] '->' condition=STRING '?' trueNode=[Node]  ':' falseNode=[Node] '->' continuationNode=[Node] ';'
+
+;
+
+MetricType:
+	'blob' | 'series' | 'scalar'
+;
+
+Metric:
+	'define' 'metric' name=ID ('as' type=MetricType )? ';'
+;
+
+MetricGenerator:
+	'generates' metric=[Metric] ';'
+;
+
 
 GroupTask:  'group' name=ID '{' node+=[Node]* '}' ';' ;
 
@@ -207,17 +232,10 @@ ConditionalExpLink:
 
 TaskPackage:
 	'task' name=ID '{'
-        elements+=TaskElement*
+        (
+        	data+=Data		|
+        	implementations+=Implementation	|
+        	params+=Param
+        )*
     '}'
 ;
-
-TaskElement:  
-	Data | Implementation | Parameter
-;
-
-Parameter:
-    'param' name=ID '{'
-        'type' type=ID ';'
-        'default' default=INT ';'
-        range=Range ';'
-    '}';
