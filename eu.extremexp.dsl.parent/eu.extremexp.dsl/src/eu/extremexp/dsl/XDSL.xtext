@@ -3,7 +3,7 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 Root:
-	isPacakge?=ExperimentPackage | isTask?=TaskPackage
+	pacakge=ExperimentPackage | task=TaskPackage
 ;
 
 ExperimentPackage:
@@ -146,7 +146,7 @@ fromNode=[Node] '->' condition=STRING '?' trueNode=[Node]  ':' falseNode=[Node] 
 ;
 
 MetricType:
-	'blob' | 'series' | 'scalar'
+	'blob'|'primitive'|'structure'|'field'|'series'
 ;
 
 Metric:
