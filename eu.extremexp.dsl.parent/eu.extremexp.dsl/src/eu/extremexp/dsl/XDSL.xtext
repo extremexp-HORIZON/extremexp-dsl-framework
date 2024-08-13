@@ -12,7 +12,7 @@ ExperimentPackage:
 ;
 
 Component:
-	Workflow | AssembledWorkflow |  Experiment
+	worfklow=Workflow | assembledWorkflow=AssembledWorkflow |  experiment=Experiment
 ;
 
 Workflow:
