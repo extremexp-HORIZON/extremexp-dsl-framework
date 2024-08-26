@@ -3,7 +3,7 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 Root:
-	pacakge=ExperimentPackage | task=TaskPackage
+	package=ExperimentPackage | task=TaskPackage
 ;
 
 ExperimentPackage:
@@ -12,7 +12,7 @@ ExperimentPackage:
 ;
 
 Component:
-	worfklow=Workflow | assembledWorkflow=AssembledWorkflow |  experiment=Experiment
+	workflow=Workflow | assembledWorkflow=AssembledWorkflow |  experiment=Experiment
 ;
 
 Workflow:
