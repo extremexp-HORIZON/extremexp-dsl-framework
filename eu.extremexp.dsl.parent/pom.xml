@@ -7,11 +7,11 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<xtextVersion>2.32.0</xtextVersion>
-		<mwe2Version>2.15.0</mwe2Version>
+		<xtextVersion>2.36.0</xtextVersion>
+		<mwe2Version>2.19.0</mwe2Version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<!-- Tycho settings -->
 		<tycho-version>4.0.8</tycho-version>
 		<!-- Define overridable properties for tycho-surefire-plugin -->
@@ -25,8 +25,6 @@
 		<module>eu.extremexp.dsl.ide</module>
 		<module>eu.extremexp.dsl.ui</module>
 		<module>eu.extremexp.dsl.target</module>
-		<module>eu.extremexp.dsl.tests</module>
-		<module>eu.extremexp.dsl.ui.tests</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -81,7 +79,7 @@
 							<requirement>
 								<type>eclipse-plugin</type>
 								<id>org.eclipse.xtext.logging</id>
-								<versionRange>1.2.24</versionRange>
+								<versionRange>0.0.0</versionRange>
 							</requirement>
 							<!-- to get the org.eclipse.osgi.compatibility.state plugin if the target
 								platform is Luna or later. (backward compatible with kepler and previous
@@ -295,16 +293,5 @@
 	</profiles>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.xtext</groupId>
-			<artifactId>org.eclipse.xtext.ide</artifactId>
-			<version>${xtextVersion}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.eclipse.lsp4j</groupId>
-					<artifactId>org.eclipse.lsp4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
 </project>

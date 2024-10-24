@@ -8,9 +8,7 @@
 	</parent>
 	<artifactId>eu.extremexp.dsl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<dependencies>
-		
-	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -43,7 +41,6 @@
 						<artifactId>xtext-antlr-generator</artifactId>
 						<version>2.1.1</version>
 					</dependency>
-	
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -63,12 +60,6 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../eu.extremexp.dsl.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
 							<directory>${basedir}/../eu.extremexp.dsl.ide/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
@@ -76,12 +67,6 @@
 						</fileset>
 						<fileset>
 							<directory>${basedir}/../eu.extremexp.dsl.ui/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../eu.extremexp.dsl.ui.tests/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>

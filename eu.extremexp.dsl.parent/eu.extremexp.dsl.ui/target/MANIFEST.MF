@@ -3,18 +3,18 @@ Automatic-Module-Name: eu.extremexp.dsl.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl.ui
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.202408060815
+Bundle-Version: 1.0.0.202410241536
 Bundle-SymbolicName: eu.extremexp.dsl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.extremexp.dsl,eu.extremexp.dsl.ide,org.eclipse.xtext.
  ui,org.eclipse.xtext.ui.shared,org.eclipse.xtext.ui.codetemplates.ui,or
  g.eclipse.ui.editors;bundle-version="3.14.300",org.eclipse.ui.ide;bundl
- e-version="3.18.500",org.eclipse.ui,org.eclipse.compare,org.eclipse.xte
- xt.builder,org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",org.ecli
- pse.xtend.lib;bundle-version="2.14.0";resolution:=optional
+ e-version="3.18.500",org.eclipse.ui,org.eclipse.xtext.xbase.lib;bundle-
+ version="2.36.0",org.eclipse.compare,org.eclipse.xtext.builder,org.ecli
+ pse.xtend.lib;bundle-version="2.36.0";resolution:=optional
 Import-Package: org.apache.log4j
 Export-Package: eu.extremexp.dsl.ui.internal,eu.extremexp.dsl.ui.content
  assist,eu.extremexp.dsl.ui.quickfix
 Bundle-Activator: eu.extremexp.dsl.ui.internal.DslActivator
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 

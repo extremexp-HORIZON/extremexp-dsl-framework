@@ -3,240 +3,151 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 Root:
-	package=ExperimentPackage | task=TaskPackage
+	'package' name=ID ';'
+	workflows += Workflow*
+	
 ;
 
-ExperimentPackage:
-	('package' name=ID ';')?
-	components += Component+
-;
-
-Component:
-	workflow=Workflow | assembledWorkflow=AssembledWorkflow |  experiment=Experiment
-;
-
+// workflow is an abstract class that can be extended by the following classes
 Workflow:
-    'workflow' name=ID '{'
-       	(
-       		tasks += Task				|
-       		data += Data				|
-       		operators += Operator		|	
-       		dataConfigs += DataConfig	|
-       		taskConfigs += TaskConfig	|
-       		nodeLinks += NodeLink		|
-       		dataLinks += DataLink		|
-       		metrics += Metric			|
-       		conditionalLinks += ConditionalLink
-       	)*
-    '}'
+	CompositeWorkflow | TaskSpecification | AssembledWorflow
+;
+
+
+
+CompositeWorkflow:
+	'workflow' name=ID '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 
+			// now
+		)*
+	'}'
+;
+
+AssembledWorflow:
+	'workflow' name=ID 'from' parent=[Workflow] '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 		|
+			
+			substitutedTask += SubstitutedTask
+		)*
+	'}'
+;
+
+TaskSpecification:
+	'task' name=ID '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 
+		)*
+	'}'
+;
+
+Node:
+	Task | Event
+;
+
+// Whatever can be linked but not necessary allowing instantiation 
+LinkableNode:
+	Node | Operator
+;
+
+
+// Data
+InputData:
+	'define' 'input' 'data' name=ID ';' 
+;
+
+OutputData:
+	'define' 'output' 'data' name=ID ';' 
+;
+
+
+// Task
+SubstitutedTask:
+	'configure' task=Task
 ;
 
 Task:
-	'define' 'task' name=ID ';'
+	(abstract?= 'define' 'task' name=ID ';')
+	|
+	// TODO if a task is directly configured without given name, should we allow it?
+	('configure' 'task' task=[Task|ID] '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 		|	
+			
+			// special members
+			metadata += MetaData		|
+			
+			// single members
+			'description' description=STRING ';'		|
+			'implementation' primitiveImplementation=STRING ';'		
+
+		)*
+		
+	'}')
 ;
 
-
-Data: 
-	'define' (output?='output'|input?='input')? 'data' name=ID
-	(assigned?=
-		'['
-		 'data'	'=' values+=Value (',' values+=Value)+	
-		']')? 
-	';'
+MetaData:
+	'{' name=STRING ':' value=STRING '}' ';'
 ;
 
-Value:
-	STRING | INT | FLOAT | BOOL | NULL | ENUM | Range
-;
-
-terminal FLOAT:
-	INT'.'INT
-;
-
-terminal BOOL:
-	'True'|'False'
-;
-
-terminal NULL:
-	'null'
-;
-
-Text:
-	INT | STRING
-;
-
-ENUM:
-    'enum''(' values+=Text (',' values+=Text)* ')'
-;
-
-Range:
-	'range' '(' minimum=INT ',' maximum=INT (',' step=INT )? ')'
-;
-Operator:
-	'define' 'operator' name=ID ';'
-;
-
-
-DataConfig:
-	'configure' 'data' alias=[Data|ID] '{'
-		'path' path=STRING ';'
-	'}'
-;
-
-TaskConfig:
-    'configure' 'task' alias=[Task|ID] '{'
-        (
-        	params += Param |
-        	implementations += Implementation	|
-        	dependencies += Dependency	|
-        	subTaskConfigs += TaskConfig	|
-        	metrics += MetricGenerator	
-        )*
-    '}'
- ;
-
-Param:
- 	'param' name=ID (
- 		(assinged?='=' (value=Value | otherParam=[Param]))
- 		| (set?='{'
- 			'type' type=ID ';'
-	        'default' default=Value ';'
-	        (range=Range ';')?
- 		'}')
- 	)? ';'
- ;
- 
-Implementation:
- 	'implementation' (workflow=[Workflow]|filename=STRING) ';'
- ;
- 
-Dependency:
- 	'dependency' dependency=STRING ';'
- ;
-Node:
-	{Operator} | {Task}
-;
-
-
-NodeLink:
-	(started?='START' '->')?  
-	nodes+=[Node] ('->' nodes+=[Node])* 
-	(ended?='->' 'END')? ';'
-;
-
-QualifiedData:
-	node=[Node]'.'data=[Data]
-;
-
-Element:
-	 {Node} | {Data} 
-;
-
-
-
-DataLink:
-    (initialQualifiedData = QualifiedData | initialElement = [Element]  ) 
-    ('-->' 	(restElements += [Element] | restQualifiedElements+= QualifiedData) )+ ';'
-;
-
-
-ConditionalLink: 
-fromNode=[Node] '->' condition=STRING '?' trueNode=[Node]  ':' falseNode=[Node] '->' continuationNode=[Node] ';'
-
-;
-
-MetricType:
-	'blob'|'primitive'|'structure'|'field'|'series'
-;
-
-Metric:
-	'define' 'metric' name=ID ('as' type=MetricType )? ';'
-;
-
-MetricGenerator:
-	'generates' metric=[Metric] ';'
-;
-
-
-GroupTask:  'group' name=ID '{' node+=[Node]* '}' ';' ;
-
-
-AssembledWorkflow:
-    'workflow' name=ID 'from' parentWorkflow=[Workflow] '{'
-        taskConfigs+=TaskConfig*
-    '}'
-;
-
-
-Experiment:
-    'experiment' name=ID '{'
-    	('intent' intent=ID ';')?
-    	(control=Control)?
-        (
-        	spaces += Space 	|
-        	events += Event
-        )* 
-    '}'
-;
-
-EventType: 
-	'automated' | 'manual'
-;
-
+// Event
 Event:
-	'event' name=ID '{'
-	    'type' eventType=EventType ';'
-	    ('condition' condition=STRING ';')?
-	    'task' validation_task=STRING ';'
-	    ('restart' restart=BOOL ';')?
+	eventValue=EventValue	
+;
+
+enum EventValue:
+	START='START' | END='END'
+;
+
+
+// Operator
+Operator:
+	Join | Parallel | Exclusive | Inclusive 
+;
+
+
+Join :
+	'JOIN-'  name=ID 
+;
+
+Parallel :
+	'PARALLEL-' name=ID 
+;
+Exclusive :
+	'EXCLUSIVE-' name=ID  
+;
+
+Inclusive :
+	'INCLUSIVE-' name=ID  
+;
+
+// Link
+Link:
+	ConditionalLink | RegularLink | ExceptionalLink
+;
+
+
+ConditionalLink:
+	input=[LinkableNode] '?->' output=[LinkableNode] '{'
+		"condition" condition=STRING ';'
 	'}'
 ;
 
-Space:
-    'space' name=ID 'of' assembled_workflow=[AssembledWorkflow] '{'
-        'strategy' strategy_name=Strategy ';'
-        (
-        	params+=Param	|
-        	tasks+=TaskConfig
-        )*
-        
-    '}';
-
-Strategy: 
-	{Strategy} ('gridsearch' |  'randomsearch' ('runs' '=' runs=INT)?)
+RegularLink:
+	input=[LinkableNode] '-->' output=[LinkableNode] ';'
 ;
 
-
-Control:
-        {Control} 'control' '{'
-               expLink+=ExpLink*
-        '}';
-
-
-ExpLink:  RegularExpLink | ConditionalExpLink;
-
-ExpNode:
-	{Space} | {Event}
-;
-
-RegularExpLink:
-	(started?='START' '->')?  
-	nodes+=[ExpNode] ('->' nodes+=[ExpNode])* 
-	(ended?='->' 'END')? ';'
-;
-
-
-ConditionalExpLink:
-    fromNode=[ExpNode] '?->' toNode=[ExpNode] '{' 'condition' condition=STRING '}' ';'
-;
-
-TaskPackage:
-	'task' name=ID '{'
-        (
-        	data+=Data		|
-        	implementations+=Implementation	|
-        	dependencies += Dependency		|
-        	params+=Param
-        )*
-    '}'
+ExceptionalLink:
+	input=[LinkableNode] '!->' output=[LinkableNode] '{'
+		"event" event=STRING ';'
+	'}'
 ;
