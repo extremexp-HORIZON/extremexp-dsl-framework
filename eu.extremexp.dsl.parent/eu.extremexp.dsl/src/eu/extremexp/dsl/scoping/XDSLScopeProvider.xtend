@@ -32,16 +32,6 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 	@Inject
     IResourceDescriptions resourceDescriptions
     
-    def resolveEObject(EObject eObjectOrProxy) {
-	    // Check if the EObject is a proxy
-	    if (eObjectOrProxy instanceof InternalEObject && (eObjectOrProxy as InternalEObject).eIsProxy) {
-	        // If it's a proxy, resolve it
-	        return (eObjectOrProxy as InternalEObject).eResolveProxy(null)
-	    }
-	    // Otherwise, return the object itself
-	    return eObjectOrProxy
-	}
-    
 	override IScope getScope(EObject context, EReference reference) {
 	        // Check if we are looking for a Workflow reference
 	        if (context instanceof AssembledWorflow){

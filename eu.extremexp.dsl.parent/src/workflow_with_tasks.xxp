@@ -1,4 +1,4 @@
 package simple;
-workflow w3 from {
+workflow aw from w2{
 	
 }

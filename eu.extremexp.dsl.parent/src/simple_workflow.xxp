@@ -1,12 +1,7 @@
 package simple;
 workflow w1 {
+	define task t1;
+	define task t2;
 	
-}
-
-task t1 {
-	
-}
-
-workflow w2 from w1 {
-	
+	t1 -> END;
 }

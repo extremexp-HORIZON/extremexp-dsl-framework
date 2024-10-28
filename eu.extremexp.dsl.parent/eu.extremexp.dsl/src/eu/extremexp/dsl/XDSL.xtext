@@ -20,8 +20,11 @@ CompositeWorkflow:
 		(
 			// shared members (i.e. super members)
 			inputs += InputData			|
-			outputs += OutputData 
-			// now
+			outputs += OutputData		| 
+			
+			// dedicated members
+			links += Link				|
+			nodes += Node
 		)*
 	'}'
 ;
@@ -33,6 +36,7 @@ AssembledWorflow:
 			inputs += InputData			|
 			outputs += OutputData 		|
 			
+			// dedicated members
 			substitutedTask += SubstitutedTask
 		)*
 	'}'
@@ -49,13 +53,9 @@ TaskSpecification:
 ;
 
 Node:
-	Task | Event
+	Task | Event 
 ;
 
-// Whatever can be linked but not necessary allowing instantiation 
-LinkableNode:
-	Node | Operator
-;
 
 
 // Data
@@ -96,7 +96,7 @@ Task:
 ;
 
 MetaData:
-	'{' name=STRING ':' value=STRING '}' ';'
+	'metadata''{' name=STRING ':' value=STRING '}' ';'
 ;
 
 // Event
@@ -111,24 +111,41 @@ enum EventValue:
 
 // Operator
 Operator:
-	Join | Parallel | Exclusive | Inclusive 
+	Join | Parallel  | Exclusive | Inclusive 
 ;
 
+
+terminal JOIN_TERM:
+	'JOIN-'INT
+;
+
+terminal PARALLEL_TERM:
+	'PARALLEL-'INT
+;
+
+terminal EXCLUSIVE_TERM:
+	'EXCLUSIVE-'INT
+;
+
+terminal INCLUSIVE_TERM:
+	'INCLUSIVE-'INT
+;
 
 Join :
-	'JOIN-'  name=ID 
-;
+    id=JOIN_TERM
+ ;
 
 Parallel :
-	'PARALLEL-' name=ID 
+	id=PARALLEL_TERM
 ;
 Exclusive :
-	'EXCLUSIVE-' name=ID  
+	id=EXCLUSIVE_TERM  
 ;
 
 Inclusive :
-	'INCLUSIVE-' name=ID  
+	id=INCLUSIVE_TERM 
 ;
+
 
 // Link
 Link:
@@ -137,17 +154,24 @@ Link:
 
 
 ConditionalLink:
-	input=[LinkableNode] '?->' output=[LinkableNode] '{'
-		"condition" condition=STRING ';'
+	input=[Node] '?->' output=[Node] '{'
+		(
+			"condition" condition=STRING ';'	|
+			"cases" cases+=Case+ 
+		)
 	'}'
 ;
 
 RegularLink:
-	input=[LinkableNode] '-->' output=[LinkableNode] ';'
+	input=[Node] '->' output=[Node] ';'
 ;
 
 ExceptionalLink:
-	input=[LinkableNode] '!->' output=[LinkableNode] '{'
+	input=[Node] '!->' output=[Node] '{'
 		"event" event=STRING ';'
 	'}'
+;
+
+Case: 
+	case=STRING target=[Node] ';'
 ;

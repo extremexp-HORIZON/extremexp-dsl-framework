@@ -3,6 +3,9 @@
  */
 package eu.extremexp.dsl.validation
 
+import org.eclipse.xtext.validation.Check
+import eu.extremexp.dsl.xDSL.Workflow
+import eu.extremexp.dsl.xDSL.XDSLPackage
 
 /**
  * This class contains custom validation rules. 
@@ -11,7 +14,7 @@ package eu.extremexp.dsl.validation
  */
 class XDSLValidator extends AbstractXDSLValidator {
 	
-//	public static val INVALID_NAME = 'invalidName'
+	public static val INVALID_NAME = 'invalidName'
 //
 //	@Check
 //	def checkGreetingStartsWithCapital(Greeting greeting) {
@@ -21,5 +24,12 @@ class XDSLValidator extends AbstractXDSLValidator {
 //					INVALID_NAME)
 //		}
 //	}
-	
+
+	// TODO enforce acyclic reference to not happen
+	@Check
+	def checkAcyclic(Workflow wf){
+		if (wf.name == "aw"){
+			error("some error", XDSLPackage.Literals.WORKFLOW__NAME, INVALID_NAME)
+		}
+	}
 }
