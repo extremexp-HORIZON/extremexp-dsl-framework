@@ -3,10 +3,18 @@
  */
 package eu.extremexp.dsl
 
+import org.eclipse.xtext.resource.IResourceDescription
+import eu.extremexp.dsl.resource.XDSLeDescriptionManager
+import eu.extremexp.dsl.scoping.GlobalScopeProvider
+import org.eclipse.xtext.scoping.impl.ResourceSetGlobalScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class XDSLRuntimeModule extends AbstractXDSLRuntimeModule {
-
+    
+//    def Class<? extends IResourceDescription.Manager> bindIResourceDescriptionManager() {
+//        return XDSLeDescriptionManager;
+//    }
+//    
 }

@@ -3,8 +3,12 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 Root:
-	'package' name=ID ';'
-	workflows += Workflow*
+	(asPackage?= 'package' name=ID ';')?
+	(
+		workflows += Workflow		|
+		groups += Group				|
+		parameterTypes += ParameterType
+	)* 
 	
 ;
 
@@ -19,11 +23,13 @@ CompositeWorkflow:
 	'workflow' name=ID '{'
 		(
 			// shared members (i.e. super members)
-			inputs += InputData			|
-			outputs += OutputData		| 
+			inputs += InputData						|	
+			outputs += OutputData					| 
 			
 			// dedicated members
-			links += Link				|
+			dataConfigurations += DataConfiguration	|
+			links += Link							|
+			dataLinks += DataLink					|
 			nodes += Node
 		)*
 	'}'
@@ -47,7 +53,11 @@ TaskSpecification:
 		(
 			// shared members (i.e. super members)
 			inputs += InputData			|
-			outputs += OutputData 
+			outputs += OutputData		| 		
+			
+			// dedicated members
+			metrics += Metric			|
+			parameters += Parameter 
 		)*
 	'}'
 ;
@@ -57,14 +67,23 @@ Node:
 ;
 
 
-
 // Data
+Data:
+	InputData | OutputData
+;
 InputData:
 	'define' 'input' 'data' name=ID ';' 
 ;
 
 OutputData:
 	'define' 'output' 'data' name=ID ';' 
+;
+
+
+DataConfiguration:
+	'configure' 'data' data=[Data] '{'
+		'path' path=STRING ';'
+	'}'
 ;
 
 
@@ -84,7 +103,7 @@ Task:
 			outputs += OutputData 		|	
 			
 			// special members
-			metadata += MetaData		|
+			('metadata''{' 	metadata +=MetaData (',' metadata +=MetaData)	 '}' )|
 			
 			// single members
 			'description' description=STRING ';'		|
@@ -96,7 +115,7 @@ Task:
 ;
 
 MetaData:
-	'metadata''{' name=STRING ':' value=STRING '}' ';'
+	name=STRING ':' value=STRING
 ;
 
 // Event
@@ -174,4 +193,72 @@ ExceptionalLink:
 
 Case: 
 	case=STRING target=[Node] ';'
+;
+QualifiedName:
+    ID ('.' ID)*
+;
+
+DataConnection:
+	OutputData | InputData | Task
+;
+
+// DataLink
+DataLink:
+	(inputData=[DataConnection|QualifiedName] '-->' outputData=[DataConnection|QualifiedName]';')
+;
+
+// Parameter and Metric
+Parameter:
+	'param' name=ID '{'
+		(
+			('type' type=ParameterType ';')? 	&
+			('default' defaultValue=STRING ';')? &
+			('constraint' valueConstraint=STRING ';')? 
+			
+		) 
+	'}'
+;
+
+Metric:
+	'metric' name=ID '{'
+		(
+			('type' type=ParameterType ';')? &
+			('kind' kind=MetricKind ';')? 
+		)
+	'}'
+;
+
+enum MetricKind:
+	Series | Scalar
+;
+
+// GROUP
+Group:
+	'group' name=ID '{'
+		tasks += Task
+	'}'
+;
+
+//ParameterType
+
+ParameterType:
+	Structure | PrimitiveType | Array
+;
+
+Structure:
+	'struct' name=ID '{'
+		fields += Field ';'
+	'}'
+;
+
+Field:
+	name=ID ('as' type=ParameterType)?
+;
+
+Array:
+	name=ID '['length=INT']' ('as' type=ParameterType)?
+;
+
+PrimitiveType returns ParameterType:
+	{PrimitiveType} ('Integer' | 'Boolean' | 'String' | 'Blob')
 ;

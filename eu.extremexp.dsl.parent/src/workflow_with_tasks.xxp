@@ -1,4 +1,6 @@
 package simple;
-workflow aw from w2{
+task td {
+	define input data X;
+	define output data Y;
 	
 }

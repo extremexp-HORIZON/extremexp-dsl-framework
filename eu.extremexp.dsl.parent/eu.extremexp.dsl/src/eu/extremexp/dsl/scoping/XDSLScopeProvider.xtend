@@ -33,7 +33,7 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
     IResourceDescriptions resourceDescriptions
     
 	override IScope getScope(EObject context, EReference reference) {
-	        // Check if we are looking for a Workflow reference
+//	         Check if we are looking for a Workflow reference
 	        if (context instanceof AssembledWorflow){
 		        if (reference == XDSLPackage.Literals.ASSEMBLED_WORFLOW__PARENT) {
 		        	val myPackageName = (context.eContainer as Root).getName
@@ -69,7 +69,7 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 	            
 		        }
 			}
-	        // Call the super method for other cases
+//	         Call the super method for other cases
 	        return super.getScope(context, reference)
 	    }
 				

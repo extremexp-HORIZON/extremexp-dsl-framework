@@ -3,5 +3,7 @@ workflow w1 {
 	define task t1;
 	define task t2;
 	
-	t1 -> END;
+	t1 --> t2;
+	t1 --> simple.td.X;
+	
 }

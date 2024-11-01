@@ -25,11 +25,11 @@ class XDSLValidator extends AbstractXDSLValidator {
 //		}
 //	}
 
-	// TODO enforce acyclic reference to not happen
-	@Check
-	def checkAcyclic(Workflow wf){
-		if (wf.name == "aw"){
-			error("some error", XDSLPackage.Literals.WORKFLOW__NAME, INVALID_NAME)
-		}
-	}
+//	// TODO enforce acyclic reference to not happen
+//	@Check
+//	def checkAcyclic(Workflow wf){
+//		if (wf.name == "aw"){
+//			error("some error", XDSLPackage.Literals.WORKFLOW__NAME, INVALID_NAME)
+//		}
+//	}
 }
