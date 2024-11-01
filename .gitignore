@@ -36,10 +36,4 @@ xtend-gen/
 
 # eclipse and mvn files
 **/target/
-<<<<<<< HEAD
-=======
-*.project
-*.settings
->>>>>>> 0f9bf43a1afbec1b1bc898e74f137198b188ab58
-
 
