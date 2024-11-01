@@ -5,7 +5,6 @@ package eu.extremexp.dsl
 
 import org.eclipse.xtext.resource.IResourceDescription
 import eu.extremexp.dsl.resource.XDSLeDescriptionManager
-import eu.extremexp.dsl.scoping.GlobalScopeProvider
 import org.eclipse.xtext.scoping.impl.ResourceSetGlobalScopeProvider
 
 /**
