@@ -38,6 +38,5 @@ xtend-gen/
 **/target/
 *.project
 *.settings
-classpath
 
 
