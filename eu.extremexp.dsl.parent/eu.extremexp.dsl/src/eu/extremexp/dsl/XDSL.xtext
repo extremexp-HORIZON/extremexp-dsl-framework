@@ -2,6 +2,7 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
+
 Root:
 	(asPackage?= 'package' name=ID ';')?
 	(
@@ -14,7 +15,7 @@ Root:
 
 // workflow is an abstract class that can be extended by the following classes
 Workflow:
-	CompositeWorkflow | TaskSpecification | AssembledWorflow
+	CompositeWorkflow | TaskSpecification | AssembledWorkflow
 ;
 
 
@@ -35,7 +36,7 @@ CompositeWorkflow:
 	'}'
 ;
 
-AssembledWorflow:
+AssembledWorkflow:
 	'workflow' name=ID 'from' parent=[Workflow] '{'
 		(
 			// shared members (i.e. super members)
@@ -57,7 +58,8 @@ TaskSpecification:
 			
 			// dedicated members
 			metrics += Metric			|
-			parameters += Parameter 
+			parameters += Parameter 	|
+			'implementation' implementation=STRING ';'	
 		)*
 	'}'
 ;
@@ -103,7 +105,7 @@ Task:
 			outputs += OutputData 		|	
 			
 			// special members
-			('metadata''{' 	metadata +=MetaData (',' metadata +=MetaData)	 '}' )|
+			('metadata''{' 	metadata += MetaData (',' metadata += MetaData)	 '}' )|
 			
 			// single members
 			'description' description=STRING ';'		|
@@ -166,6 +168,10 @@ Inclusive :
 ;
 
 
+LinkableNode returns Node:
+	ref=[Node] | Event | Operator
+;
+
 // Link
 Link:
 	ConditionalLink | RegularLink | ExceptionalLink
@@ -173,7 +179,7 @@ Link:
 
 
 ConditionalLink:
-	input=[Node] '?->' output=[Node] '{'
+	input=LinkableNode '?->' output=LinkableNode '{'
 		(
 			"condition" condition=STRING ';'	|
 			"cases" cases+=Case+ 
@@ -182,11 +188,11 @@ ConditionalLink:
 ;
 
 RegularLink:
-	input=[Node] '->' output=[Node] ';'
+	( input=LinkableNode) ('->' ouput+=LinkableNode)+ ';'
 ;
 
 ExceptionalLink:
-	input=[Node] '!->' output=[Node] '{'
+	input=LinkableNode '!->' output=LinkableNode '{'
 		"event" event=STRING ';'
 	'}'
 ;
@@ -194,17 +200,15 @@ ExceptionalLink:
 Case: 
 	case=STRING target=[Node] ';'
 ;
-QualifiedName:
-    ID ('.' ID)*
-;
+
 
 DataConnection:
-	OutputData | InputData | Task
+	ref=[Data] | task=[Task]'.'taskRef=[Data]
 ;
 
 // DataLink
 DataLink:
-	(inputData=[DataConnection|QualifiedName] '-->' outputData=[DataConnection|QualifiedName]';')
+	inputData=DataConnection '-->' outputData=DataConnection';'
 ;
 
 // Parameter and Metric
