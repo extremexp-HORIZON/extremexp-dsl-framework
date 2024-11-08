@@ -1,4 +1,0 @@
-package simple;
-workflow w from w1 {
-	
-}

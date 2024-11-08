@@ -1,6 +1,0 @@
-package simple;
-task td {
-	define input data X;
-	define output data Y;
-	
-}

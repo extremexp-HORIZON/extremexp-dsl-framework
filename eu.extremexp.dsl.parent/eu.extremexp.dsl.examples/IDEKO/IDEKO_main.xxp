@@ -1,0 +1,68 @@
+package IDEKO;
+
+workflow IDEKO_main {
+
+  define task ReadData;
+  define task PrepareData;
+  define task TrainModel;
+  define task EvaluateModel;
+ 
+   START -> ReadData -> PrepareData -> TrainModel -> EvaluateModel -> END;
+   
+   // example for Parallel tasks
+   PARALLEL-1 -> ReadData;
+   PARALLEL-1 -> PrepareData;
+   
+  //example for using a conditional branching
+   START -> ReadData;
+   define task PrepareData1;
+   define task PrepareData2;
+   ReadData ?-> PrepareData1 {
+   		condition "condition1";
+   }
+   ReadData ?-> PrepareData2 {
+   		condition "condition2";
+   }
+   PrepareData1 -> TrainModel;
+   PrepareData2 -> TrainModel;
+   TrainModel -> EvaluateModel -> END;
+   
+   
+   configure task ReadData {
+   	define input data a;
+    implementation "IDEKO-task-library.ReadIDEKOData";
+  }
+
+  configure task PrepareData {
+    implementation "IDEKO-experiment1.IDEKO_DataPreprocessing";
+  }
+
+  configure task EvaluateModel {
+    implementation "IDEKO-task-library.EvaluateModel";
+  }
+
+  // DATA
+  define input data ExternalDataFile;
+  define output data ProducedModel;
+
+  configure data ExternalDataFile {
+    path "datasets/ideko-subset/**";
+  }
+   
+  ExternalDataFile --> ReadData.ExternalDataFileForIDEKO; 
+  ReadData.X --> PrepareData.X1;
+  ReadData.Y --> PrepareData.Y1;
+  ReadData.IndicatorList --> PrepareData.IndicatorList1;
+  PrepareData.XPad --> TrainModel.XPad;
+  PrepareData.YPad --> TrainModel.YPad;
+  PrepareData.FeaturesTrain --> TrainModel.FeaturesTrain;
+  PrepareData.FeaturesTest --> TrainModel.FeaturesTest;
+  PrepareData.LabelsTrain --> TrainModel.LabelsTrain;
+  PrepareData.LabelsTest --> TrainModel.LabelsTest;
+  TrainModel.TrainedModel --> EvaluateModel.TrainedModel;
+  PrepareData.FeaturesTest --> EvaluateModel.FeaturesTest;
+  PrepareData.LabelsTest --> EvaluateModel.LabelsTest;
+  TrainModel.TrainedModel --> ProducedModel;
+  
+ 
+}
