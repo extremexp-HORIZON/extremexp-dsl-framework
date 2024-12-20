@@ -8,7 +8,8 @@ Root:
 	(
 		workflows += Workflow		|
 		groups += Group				|
-		parameterTypes += ParameterType
+		parameterTypes += ParameterType	|
+		experiments += Experiment
 	)* 
 	
 ;
@@ -25,10 +26,12 @@ CompositeWorkflow:
 		(
 			// shared members (i.e. super members)
 			inputs += InputData						|	
-			outputs += OutputData					| 
+			outputs += OutputData					|
 			
 			// dedicated members
+			('define' 'task' tasks+= Task (','  tasks+= Task)* ';') |
 			dataConfigurations += DataConfiguration	|
+			taskConfigurations += TaskConfiguration	|
 			links += Link							|
 			dataLinks += DataLink					|
 			nodes += Node
@@ -44,6 +47,7 @@ AssembledWorkflow:
 			outputs += OutputData 		|
 			
 			// dedicated members
+			taskConfigurations += TaskConfiguration	|
 			substitutedTask += SubstitutedTask
 		)*
 	'}'
@@ -59,7 +63,8 @@ TaskSpecification:
 			// dedicated members
 			metrics += Metric			|
 			parameters += Parameter 	|
-			'implementation' implementation=STRING ';'	
+			'implementation' implementation=STRING ';'	|
+			'dependency' dependency=STRING ';'
 		)*
 	'}'
 ;
@@ -95,11 +100,12 @@ SubstitutedTask:
 ;
 
 Task:
-	(abstract?= 'define' 'task' name=ID ';')
-	|
-	// TODO if a task is directly configured without given name, should we allow it?
-	('configure' 'task' task=[Task|ID] '{'
-		(
+	 name=ID 
+;
+
+TaskConfiguration:
+	{Task} 'configure' 'task' task=[Task] '{'
+	((
 			// shared members (i.e. super members)
 			inputs += InputData			|
 			outputs += OutputData 		|	
@@ -109,11 +115,13 @@ Task:
 			
 			// single members
 			'description' description=STRING ';'		|
-			'implementation' primitiveImplementation=STRING ';'		
+			'implementation' primitiveImplementation=STRING ';'	
+	
 
-		)*
-		
-	'}')
+	)* 
+	|
+	(notImplemented = '...'))
+	'}'
 ;
 
 MetaData:
@@ -201,9 +209,13 @@ Case:
 	case=STRING target=[Node] ';'
 ;
 
+// we have to remove abstract tasks
+ComponentWithData:
+	TaskConfiguration | Workflow 
+;
 
 DataConnection:
-	ref=[Data] | task=[Task]'.'taskRef=[Data]
+	(component=[ComponentWithData] fromComponent?='.')? ref=[Data]
 ;
 
 // DataLink
@@ -266,3 +278,141 @@ Array:
 PrimitiveType returns ParameterType:
 	{PrimitiveType} ('Integer' | 'Boolean' | 'String' | 'Blob')
 ;
+
+
+
+
+
+// Experiment DSL
+Experiment:
+    'experiment' name=ID '{'
+    	('intent' intent=ID ';')?
+        (
+        	tasks += ExperimentTask |
+        	interactions += Interaction	| 
+        	spaces += Space 			|
+        	control = Control
+        )* 
+        
+    '}'
+;
+
+Interaction:
+	'interaction' name=ID '{'
+	    (
+			tasks += Action*	    	
+ 		|
+			(notImplemented = '...')
+		) 
+	'}' 
+;
+
+TaskArgument:
+	string=STRING | id=ID
+;
+
+Action:
+	('task' taskName=ID '(' (arguments+=TaskArgument (',' arguments+=TaskArgument)*)? ')' ';')
+	
+;
+
+ExperimentTask:
+	'task' name=ID '{'
+		(
+			( 
+				'implementation' implementaion=STRING ';' | 
+				tasks += Action
+			)*
+		|
+			(notImplemented = '...')
+		)  
+	'}'
+;
+
+Space:
+    'space' name=ID 'of' assembledWorkflow=[AssembledWorkflow] '{'
+		(
+			( 
+				'strategy' strategy=ID ';' 	|
+				params += Param				|		
+				taskConfigurations += ExperimentTaskConfiguraiton 
+				
+			)*
+		|
+			(notImplemented = '...')
+		)  
+        
+    '}'
+;
+ExperimentTaskConfiguraiton:
+	'configure' 'task' task=[Task] '{'
+		(
+			( 
+				params += Param
+				
+			)*
+		|
+			(notImplemented = '...')
+		)  
+        
+    '}'
+	
+;
+
+Param:
+	'param' name=ID (assigned?='=' (value=ParamValue | ref=[Param|ID]))? ';' 
+;
+
+ParamValue:
+	rangeValue=ParamValueRange | enumValue=ParamValueEnum | stringValue=STRING | listValue=ParamValueList
+;
+ParamValueRange:
+	'range' '('start=INT ',' end=INT (',' step=INT)?')'
+;
+ParamValueEnum:
+	'enum' '(' values+=PrimitiveValue (',' values+=PrimitiveValue)* ')'
+;
+ParamValueList:
+	'[' values+=PrimitiveValue (',' values+=PrimitiveValue)* ']'
+;
+PrimitiveValue:
+	INT | STRING | FLOAT
+;
+
+terminal FLOAT:
+	'-'? INT '.' INT
+;
+
+
+Control:
+        {Control}'control' '{'
+        (
+			flows += ExperimentFlow*
+			
+			|
+			(notImplemented = '...')
+		)  
+		'}'
+;
+
+ExperimentFlow:
+	RegularExpLink | ConditionalExpLink
+;
+
+ExperimentNode:
+	Space | Interaction
+;
+
+RegularExpLink:
+	(started?='START' '->')?  
+	(nodes+=[ExperimentNode] | parallelNodes+=ParallelNodes) ('->' (nodes+=[ExperimentNode] | parallelNodes+=ParallelNodes))* 
+	(ended?='->' 'END')? ';'
+;
+ParallelNodes:
+	'(' nodes+=[ExperimentNode] ('||' nodes+=[ExperimentNode])+ ')' 
+;
+
+ConditionalExpLink:
+    fromNode=[ExperimentNode] '?->' toNode=[ExperimentNode] '{' 'condition' condition=STRING '}' ';'
+;
+

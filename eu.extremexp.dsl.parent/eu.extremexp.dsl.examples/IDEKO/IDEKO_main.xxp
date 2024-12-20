@@ -6,7 +6,7 @@ workflow IDEKO_main {
   define task PrepareData;
   define task TrainModel;
   define task EvaluateModel;
- 
+
    START -> ReadData -> PrepareData -> TrainModel -> EvaluateModel -> END;
    
    // example for Parallel tasks
@@ -29,12 +29,11 @@ workflow IDEKO_main {
    
    
    configure task ReadData {
-   	define input data a;
     implementation "IDEKO-task-library.ReadIDEKOData";
   }
 
   configure task PrepareData {
-    implementation "IDEKO-experiment1.IDEKO_DataPreprocessing";
+    implementation "IDEKO_DataPreprocessing";
   }
 
   configure task EvaluateModel {
@@ -48,21 +47,68 @@ workflow IDEKO_main {
   configure data ExternalDataFile {
     path "datasets/ideko-subset/**";
   }
+  
    
-  ExternalDataFile --> ReadData.ExternalDataFileForIDEKO; 
-  ReadData.X --> PrepareData.X1;
-  ReadData.Y --> PrepareData.Y1;
-  ReadData.IndicatorList --> PrepareData.IndicatorList1;
-  PrepareData.XPad --> TrainModel.XPad;
-  PrepareData.YPad --> TrainModel.YPad;
-  PrepareData.FeaturesTrain --> TrainModel.FeaturesTrain;
-  PrepareData.FeaturesTest --> TrainModel.FeaturesTest;
-  PrepareData.LabelsTrain --> TrainModel.LabelsTrain;
-  PrepareData.LabelsTest --> TrainModel.LabelsTest;
-  TrainModel.TrainedModel --> EvaluateModel.TrainedModel;
-  PrepareData.FeaturesTest --> EvaluateModel.FeaturesTest;
-  PrepareData.LabelsTest --> EvaluateModel.LabelsTest;
-  TrainModel.TrainedModel --> ProducedModel;
+  ExternalDataFile --> IDEKO_DataPreprocessing.FeaturesTest;
+  ReadData.X -->  ExternalDataFile;
+//  ReadData.IndicatorList --> PrepareData.IndicatorList1;
+//  PrepareData.XPad --> TrainModel.XPad;
+//  PrepareData.YPad --> TrainModel.YPad;
+//  PrepareData.FeaturesTrain --> TrainModel.FeaturesTrain;
+//  PrepareData.FeaturesTest --> TrainModel.FeaturesTest;
+//  PrepareData.LabelsTrain --> TrainModel.LabelsTrain;
+//  PrepareData.LabelsTest --> TrainModel.LabelsTest;
+//  TrainModel.TrainedModel --> EvaluateModel.TrainedModel;
+//  PrepareData.FeaturesTest --> EvaluateModel.FeaturesTest;
+//  PrepareData.LabelsTest --> EvaluateModel.LabelsTest;
+//  TrainModel.TrainedModel --> ProducedModel;
   
  
+}
+
+
+workflow IDEKO_DataPreprocessing {
+
+  define task AddPadding;
+  define task SplitData;
+
+  START -> AddPadding -> SplitData -> END;
+
+  configure task AddPadding {
+    implementation "IDEKO-task-library.AddPaddingTask" ;
+  }
+
+  configure task SplitData {
+    implementation "extremexp-mltask-library.PrepareData.SplitData" ;
+  }
+
+  // DATA
+  define input data X1;
+  define input data Y1;
+  define input data IndicatorList1;
+
+  define output data XPad;
+  define output data YPad;
+  define output data FeaturesTrain;
+  define output data FeaturesTest;
+  define output data LabelsTrain;
+  define output data LabelsTest;
+
+//  // DATA CONNECTIONS
+//  X1 --> AddPadding.X;
+//  Y1 --> AddPadding.Y;
+//  IndicatorList1 --> AddPadding.IndicatorList;
+//  AddPadding.XPad --> SplitData.Features;
+//  AddPadding.YPad --> SplitData.Labels;
+//  SplitData.FeaturesTrain --> FeaturesTrain;
+//  SplitData.FeaturesTest --> FeaturesTest;
+//  SplitData.LabelsTrain --> LabelsTrain;
+//  SplitData.LabelsTest --> LabelsTest;
+
+  // X, Y, IndicatorList --> AddPadding;
+  // AddPadding --> XPad, YPad;
+  // XPad, YPad -> SplitData;
+  // SplitData -> FeaturesTrain, FeaturesTest, LabelsTrain, LabelsTest;
+
+
 }

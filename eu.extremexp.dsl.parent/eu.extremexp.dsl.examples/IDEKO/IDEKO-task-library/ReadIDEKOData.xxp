@@ -7,7 +7,7 @@
 
 task ReadIDEKOData {
     // defining the input data
-    define input data ExternalDataFileForIDEKO;
+    //define input data ExternalDataFileForIDEKO;
 
     define output data X;
     define output data Y;

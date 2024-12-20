@@ -1,4 +1,7 @@
 package basic;
 workflow Basic {
-	
+	define task t1;
+	define task t2;
+	PARALLEL-1 -> t1;
+	PARALLEL-1 -> t2;
 }
