@@ -33,15 +33,15 @@ public class RunServer {
         @Override
         protected void configure() {
             super.configure();
-            // Remove automated termination of the whole VM when the LangServer object losts a connection.
+            // Remove automated termination of the whole VM when the LangServer object losses a connection.
             bind(ILanguageServerShutdownAndExitHandler.class).to(ILanguageServerShutdownAndExitHandler.NullImpl.class);
         }
     }
 
-    private static final int port = 5007;
+    private static int port = 5007;
 
     public static void main(String[] args) {
-        System.out.println("Welcome to XXP LSP version 4.0 - Resolved");
+        
         Injector injector = Guice.createInjector(new DSLServerModule());
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -49,7 +49,24 @@ public class RunServer {
             MessageConsumer result = consumer;
             return result;
         };
-
+        
+        if (args.length > 0) {
+        	try {
+        		RunServer.port = Integer.parseInt(args[0]);
+        	}
+        	catch (NumberFormatException e){
+        		e.printStackTrace();
+        		System.out.println("Port should be a number between 1024–49151");
+        		System.exit(1);
+        	}
+        	if (RunServer.port< 1024 || RunServer.port > 49151 ) {
+        		System.out.println("Port should be a number between 1024–49151");
+        		System.exit(1);
+        	}
+        }
+        System.out.println("LSP Activated on port: " + RunServer.port);
+        System.out.println("DSL Language Version: 5.0");
+        
         try (final AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port))) {
             System.out.println("LSP listening on " + port);
             server.accept(null, new CompletionHandler<AsynchronousSocketChannel, Object>() {
