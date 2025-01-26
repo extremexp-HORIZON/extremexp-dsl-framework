@@ -1,0 +1,45 @@
+workflow IDEKO_DataPreprocessing {
+
+  define task AddPadding;
+  define task SplitData;
+
+  START -> AddPadding -> SplitData -> END;
+
+  configure task AddPadding {
+    implementation "IDEKO-task-library.AddPadding" ;
+  }
+
+  configure task SplitData {
+    implementation "extremexp-mltask-library.PrepareData.SplitData" ;
+  }
+
+  // DATA
+  define input data X1;
+  define input data Y1;
+  define input data IndicatorList1;
+
+  define output data XPad;
+  define output data YPad;
+  define output data FeaturesTrain;
+  define output data FeaturesTest;
+  define output data LabelsTrain;
+  define output data LabelsTest;
+
+  // DATA CONNECTIONS
+  X1 --> AddPadding.X;
+  Y1 --> AddPadding.Y;
+  IndicatorList1 --> AddPadding.IndicatorList;
+  AddPadding.XPad --> SplitData.Features;
+  AddPadding.YPad --> SplitData.Labels;
+  SplitData.FeaturesTrain --> FeaturesTrain;
+  SplitData.FeaturesTest --> FeaturesTest;
+  SplitData.LabelsTrain --> LabelsTrain;
+  SplitData.LabelsTest --> LabelsTest;
+
+  // X, Y, IndicatorList --> AddPadding;
+  // AddPadding --> XPad, YPad;
+  // XPad, YPad -> SplitData;
+  // SplitData -> FeaturesTrain, FeaturesTest, LabelsTrain, LabelsTest;
+
+
+}
