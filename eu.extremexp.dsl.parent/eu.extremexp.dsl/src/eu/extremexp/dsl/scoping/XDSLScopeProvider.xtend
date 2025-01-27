@@ -106,39 +106,39 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 //    }
     
     
-    def scopeForConfiguredTasksAndData(DataLink context, CompositeWorkflow container){
-    	
-    	val resolvedDataPoints = newArrayList()
-    	container.eContents.forEach[
-    		content	|
-    		
-    		if (content instanceof TaskConfiguration){
-    			resolvedDataPoints.add(EcoreUtil2.resolve(content, context))
-    			
-    			
-    		}
-    		
-    		if (content instanceof Data){
-    			resolvedDataPoints.add(EcoreUtil2.resolve(content, context))
-    		}
-    	]
-    	return Scopes.scopeFor(resolvedDataPoints)
-    	
-    }
-    
-    
-    def scopeForConfiguredTaskDataPoints(CompositeWorkflow container, Task task){
-    	val resolvedDataPoints = <Data>newArrayList()
-    	container.eContents.forEach[
-    		content	|
-    		
-    		if (content instanceof Task){
-    			if(content.task == task){
-    				resolvedDataPoints += content.inputs
-    				resolvedDataPoints += content.outputs
-    				if (content.primitiveImplementation !== null){
-    					val tasks = newHashMap
-    					val address = content.primitiveImplementation.replace('.', '/')
+//    def scopeForConfiguredTasksAndData(DataLink context, CompositeWorkflow container){
+//    	
+//    	val resolvedDataPoints = newArrayList()
+//    	container.eContents.forEach[
+//    		content	|
+//    		
+//    		if (content instanceof TaskConfiguration){
+//    			resolvedDataPoints.add(EcoreUtil2.resolve(content, context))
+//    			
+//    			
+//    		}
+//    		
+//    		if (content instanceof Data){
+//    			resolvedDataPoints.add(EcoreUtil2.resolve(content, context))
+//    		}
+//    	]
+//    	return Scopes.scopeFor(resolvedDataPoints)
+//    	
+//    }
+//    
+//    
+//    def scopeForConfiguredTaskDataPoints(CompositeWorkflow container, Task task){
+//    	val resolvedDataPoints = <Data>newArrayList()
+//    	container.eContents.forEach[
+//    		content	|
+//    		
+//    		if (content instanceof Task){
+//    			if(content.task == task){
+//    				resolvedDataPoints += content.inputs
+//    				resolvedDataPoints += content.outputs
+//    				if (content.primitiveImplementation !== null){
+//    					val tasks = newHashMap
+//    					val address = content.primitiveImplementation.replace('.', '/')
 //    					println(EcoreUtil2.getAllContentsOfType(container.eResource, Workflow))
 //    						k.resources.forEach[resource|
 //    							EcoreUtil2.getAllContentsOfType(resource, Workflow).forEach[ wf |
@@ -181,25 +181,25 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 //    								}
 //    							]
 //							]
-							
-						}
-						
-					}
-					
-				}
-				
-			]
-		
-    	return Scopes.scopeFor(resolvedDataPoints)
-    }
-    
-    
-    def scopeForWorkflowData(Workflow wf){
-    	var resolvedDataPoints = wf.inputs + wf.outputs
-    	return Scopes.scopeFor(resolvedDataPoints)
-    }
-    
-    
+//							
+//						}
+//						
+//					}
+//					
+//				}
+//				
+//			]
+//		
+//    	return Scopes.scopeFor(resolvedDataPoints)
+//    }
+//    
+//    
+//    def scopeForWorkflowData(Workflow wf){
+//    	var resolvedDataPoints = wf.inputs + wf.outputs
+//    	return Scopes.scopeFor(resolvedDataPoints)
+//    }
+//    
+//    
 	override IScope getScope(EObject context, EReference reference) {
 			// Check if we are looking for a Workflow reference
 //	        if (context instanceof AssembledWorkflow){
@@ -238,54 +238,54 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 			}
 			
 			// If we are looking at data point of a task to use in data link
-			if (context instanceof DataLink){
-				
-				// first, we want to find all the tasks and data in the workflow
-		        if (reference == XDSLPackage.Literals.DATA_CONNECTION__REF) {
-		        	if (context.eContainer instanceof CompositeWorkflow){
-		        		return scopeForConfiguredTasksAndData(context, context.eContainer as CompositeWorkflow)
-		        	}
-		        }
-				
-			}
-			
-			if (context instanceof DataConnection){
-		        if (reference == XDSLPackage.Literals.DATA_CONNECTION__REF) {
-		        	// if from other workflows, then the data points of the workflow should be returned
-		        	if (context.fromComponent){
-		        		/*
-		        		 * if the data point is accessed by qualified name, we take the parent component and load its data point
-		        		 * 2 possibilities
-		        		 * 1- from ROOT.pacakge import all (CompositeWorkflow, TaskSpecification, AssembledWorkflow)
-		        		 * 2- from task configuration, bring the implementation only
-		        		 */
-		        		var component = EcoreUtil2.resolve(context.component, context)
-		        		if (component instanceof Workflow){
-		        			return scopeForWorkflowData(component);
-						}
-						if (component instanceof Task){
-							return scopeForConfiguredTaskDataPoints(component.eContainer as CompositeWorkflow, component)
-						}
-		        	}
-		        	else{
-		        		val dl = context.eContainer
-		        		if (dl instanceof DataLink){
-		        			val wf = dl.eContainer
-			        		if (wf instanceof CompositeWorkflow){ 
-				        		// bring local data inputs and outputs
-			        			return Scopes.scopeFor(wf.inputs + wf.outputs)
-			        		
-			        		}
-		        		}
-		        		
-		        		
-		        	}
-//		        	if (context.task.eContainer instanceof CompositeWorkflow){
-//						return scopeForConfiguredTaskDataPoints(context.task.eContainer as CompositeWorkflow, context.task)		        		
+//			if (context instanceof DataLink){
+//				
+//				// first, we want to find all the tasks and data in the workflow
+//		        if (reference == XDSLPackage.Literals.DATA_CONNECTION__REF) {
+//		        	if (context.eContainer instanceof CompositeWorkflow){
+//		        		return scopeForConfiguredTasksAndData(context, context.eContainer as CompositeWorkflow)
 //		        	}
-		        }
+//		        }
+//				
+//			}
+			
+//			if (context instanceof DataConnection){
+//		        if (reference == XDSLPackage.Literals.DATA_CONNECTION__REF) {
+//		        	// if from other workflows, then the data points of the workflow should be returned
+//		        	if (context.fromComponent){
+//		        		/*
+//		        		 * if the data point is accessed by qualified name, we take the parent component and load its data point
+//		        		 * 2 possibilities
+//		        		 * 1- from ROOT.pacakge import all (CompositeWorkflow, TaskSpecification, AssembledWorkflow)
+//		        		 * 2- from task configuration, bring the implementation only
+//		        		 */
+//		        		var component = EcoreUtil2.resolve(context.component, context)
+//		        		if (component instanceof Workflow){
+//		        			return scopeForWorkflowData(component);
+//						}
+//						if (component instanceof Task){
+//							return scopeForConfiguredTaskDataPoints(component.eContainer as CompositeWorkflow, component)
+//						}
+//		        	}
+//		        	else{
+//		        		val dl = context.eContainer
+//		        		if (dl instanceof DataLink){
+//		        			val wf = dl.eContainer
+//			        		if (wf instanceof CompositeWorkflow){ 
+//				        		// bring local data inputs and outputs
+//			        			return Scopes.scopeFor(wf.inputs + wf.outputs)
+//			        		
+//			        		}
+//		        		}
+//		        		
+//		        		
+//		        	}
+////		        	if (context.task.eContainer instanceof CompositeWorkflow){
+////						return scopeForConfiguredTaskDataPoints(context.task.eContainer as CompositeWorkflow, context.task)		        		
+////		        	}
+//		        }
 				
-			}
+//			}
 
 	        return super.getScope(context, reference)
 	    }
