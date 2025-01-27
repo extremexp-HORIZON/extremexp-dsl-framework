@@ -214,13 +214,18 @@ ComponentWithData:
 	TaskConfiguration | Workflow 
 ;
 
+
 DataConnection:
 	(component=[ComponentWithData] fromComponent?='.')? ref=[Data]
 ;
 
 // DataLink
+// TODO
+GlobalID:
+	ID('.'ID)?
+;
 DataLink:
-	inputData=DataConnection '-->' outputData=DataConnection';'
+	inputData=GlobalID '-->' outputData=GlobalID';'
 ;
 
 // Parameter and Metric

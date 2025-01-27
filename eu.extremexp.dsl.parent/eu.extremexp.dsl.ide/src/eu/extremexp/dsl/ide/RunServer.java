@@ -19,15 +19,17 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.xtext.ide.server.LanguageServerImpl;
 import org.eclipse.xtext.ide.server.ILanguageServerShutdownAndExitHandler;
 import org.eclipse.xtext.ide.server.ServerModule;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /**
  * Runner for the ExtremeXP DSL language server.
  */
 public class RunServer {
-
+	  
     private static class DSLServerModule extends ServerModule {
 
         @Override

@@ -40,16 +40,17 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 	
 //	@Inject
 //    IResourceDescriptions resourceDescriptions
-    
+//    
+
 //    def scopeForAssembledWorkflow(AssembledWorkflow context, EReference reference){
 //    	val root = (context.eContainer as Root)
 //    	val myPackageName = root.name
 //    	// Get all available resources (files) in the workspace
-//    	val resolvedWorklfows = root.workflows.filter[it != context].map[it | it as EObject].toList     	
-//        resourceDescriptions.allResourceDescriptions.forEach[ resourceDescription |
+//    	val resolvedWorklfows = root.workflows.filter[it != context].map[it | it as EObject].toList  	
+//        resourceDescriptions?.allResourceDescriptions?.forEach[ resourceDescription |
 //        	val workflows = newArrayList()
 //        	val packageNames = newArrayList()
-//            resourceDescription.exportedObjects.forEach[exportedObject |
+//            resourceDescription?.exportedObjects.forEach[exportedObject |
 //            	if (exportedObject.EClass.name == "Root"){
 //            		 packageNames.add(exportedObject.name.toString)
 //            	}
@@ -73,7 +74,7 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 //        
 //        return Scopes.scopeFor(resolvedWorklfows)
 //    }
-//    
+    
 //    def scopeForDataConnectionTasks(DataConnection context, EReference reference){
 //    	val myPackageName = (context.eContainer as Root).name
 //    	// Get all available resources (files) in the workspace
@@ -126,17 +127,31 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
     }
     
     
-//    def scopeForConfiguredTaskDataPoints(CompositeWorkflow container, Task task){
-//    	val resolvedDataPoints = <Data>newArrayList()
-//    	val myPackageName = (container.eContainer as Root).name
-//    	container.eContents.forEach[
-//    		content	|
-//    		
-//    		if (content instanceof Task){
-//    			if(content.task == task){
-//    				resolvedDataPoints += content.inputs
-//    				resolvedDataPoints += content.outputs
-//    				if (content.primitiveImplementation !== null){
+    def scopeForConfiguredTaskDataPoints(CompositeWorkflow container, Task task){
+    	val resolvedDataPoints = <Data>newArrayList()
+    	container.eContents.forEach[
+    		content	|
+    		
+    		if (content instanceof Task){
+    			if(content.task == task){
+    				resolvedDataPoints += content.inputs
+    				resolvedDataPoints += content.outputs
+    				if (content.primitiveImplementation !== null){
+    					val tasks = newHashMap
+    					val address = content.primitiveImplementation.replace('.', '/')
+//    					println(EcoreUtil2.getAllContentsOfType(container.eResource, Workflow))
+//    						k.resources.forEach[resource|
+//    							EcoreUtil2.getAllContentsOfType(resource, Workflow).forEach[ wf |
+//    								println (resource.URI.path)
+//    								println (address)
+//    								if (resource.URI.path.contains(address)){
+//    									var workflow = EcoreUtil2.resolve(wf, container.eContainer) as Workflow
+//    									println(workflow)
+//										resolvedDataPoints += workflow.inputs
+//    									resolvedDataPoints += workflow.outputs
+//    								}
+//    							]
+//    						]
 //    					    resourceDescriptions.allResourceDescriptions.forEach[ resourceDescription |
 //					        	val tasks = newHashMap
 //					        	val packageNames = newArrayList()
@@ -166,17 +181,17 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 //    								}
 //    							]
 //							]
-//							
-//						}
-//						
-//					}
-//					
-//				}
-//				
-//			]
-//		
-//    	return Scopes.scopeFor(resolvedDataPoints)
-//    }
+							
+						}
+						
+					}
+					
+				}
+				
+			]
+		
+    	return Scopes.scopeFor(resolvedDataPoints)
+    }
     
     
     def scopeForWorkflowData(Workflow wf){
@@ -187,18 +202,18 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
     
 	override IScope getScope(EObject context, EReference reference) {
 			// Check if we are looking for a Workflow reference
-	        if (context instanceof AssembledWorkflow){
-		        if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__PARENT) {
-		        	//return scopeForAssembledWorkflow(context, reference)
-		        }
-			}
+//	        if (context instanceof AssembledWorkflow){
+//		        if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__PARENT) {
+//		        	return scopeForAssembledWorkflow(context, reference)
+//		        }
+//			}
 
 			// Find tasks from all parent Workflow s
 			if (context instanceof TaskConfiguration){
 				if (context.eContainer instanceof AssembledWorkflow){
 					var fromCompositeWorkflow = context.eContainer as Workflow
 					
-					while (!(fromCompositeWorkflow instanceof CompositeWorkflow)){
+					while (!(fromCompositeWorkflow instanceof CompositeWorkflow) && (fromCompositeWorkflow !== null)){
 						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
 					}
 					if (fromCompositeWorkflow instanceof CompositeWorkflow){
@@ -213,7 +228,7 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 				if (space instanceof Space){
 					var fromCompositeWorkflow = space.assembledWorkflow as Workflow
 					
-					while (!(fromCompositeWorkflow instanceof CompositeWorkflow)){
+					while (!(fromCompositeWorkflow instanceof CompositeWorkflow)  && (fromCompositeWorkflow !== null)){
 						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
 					}
 					if (fromCompositeWorkflow instanceof CompositeWorkflow){
@@ -249,7 +264,7 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 		        			return scopeForWorkflowData(component);
 						}
 						if (component instanceof Task){
-							//return scopeForConfiguredTaskDataPoints(component.eContainer as CompositeWorkflow, component)
+							return scopeForConfiguredTaskDataPoints(component.eContainer as CompositeWorkflow, component)
 						}
 		        	}
 		        	else{
