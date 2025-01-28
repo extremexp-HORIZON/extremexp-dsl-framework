@@ -1,0 +1,123 @@
+package IDEKO;
+
+workflow IDEKO_main {
+
+  define task ReadData;
+  define task PrepareData;
+  define task TrainModel;
+  define task EvaluateModel;
+
+
+  // Task CONNECTIONS
+  START -> ReadData -> PrepareData -> TrainModel -> EvaluateModel -> END;
+
+  //example for using a conditional branching
+  // START -> ReadData;
+  // ReadData ?-> PrepareData1 ["condition1"];
+  // ReadData ?-> PrepareData2 ["condition2"];
+  // PrepareData1 -> TrainModel;
+  // PrepareData2 -> TrainModel;
+  // TrainModel -> EvaluateModel -> END;
+
+ 
+
+  configure task ReadData {
+    implementation "IDEKO-task-library.ReadIDEKOData";
+  }
+
+  configure task PrepareData {
+    implementation "IDEKO-experiment1.IDEKO_DataPreprocessing";
+  }
+
+  configure task EvaluateModel {
+    implementation "IDEKO-task-library.EvaluateModel";
+  }
+
+  // DATA
+  define input data ExternalDataFile;
+  define output data ProducedModel;
+
+  configure data ExternalDataFile {
+    path "datasets/ideko-subset/**";
+  }
+  
+  configure task TrainModel {
+    implementation "IDEKO-task-library.TrainModelNN";
+  }
+
+  // DATA CONNECTIONS
+  ExternalDataFile --> ReadData.ExternalDataFileForIDEKO; 
+  ReadData.X --> PrepareData.X1;
+  ReadData.Y --> PrepareData.Y1;
+  ReadData.IndicatorList --> PrepareData.IndicatorList1;
+  PrepareData.XPad --> TrainModel.XPad;
+  PrepareData.YPad --> TrainModel.YPad;
+  PrepareData.FeaturesTrain --> TrainModel.FeaturesTrain;
+  PrepareData.FeaturesTest --> TrainModel.FeaturesTest;
+  PrepareData.LabelsTrain --> TrainModel.LabelsTrain;
+  PrepareData.LabelsTest --> TrainModel.LabelsTest;
+  TrainModel.TrainedModel --> EvaluateModel.TrainedModel;
+  PrepareData.FeaturesTest --> EvaluateModel.FeaturesTest;
+  PrepareData.LabelsTest --> EvaluateModel.LabelsTest;
+  TrainModel.TrainedModel --> ProducedModel;
+  
+  // define metric metric1 {
+  //   id  "executiontime" ;
+
+  // }
+  
+}
+
+workflow IDEKO_main_WITH_NN from IDEKO_main {
+
+  configure task TrainModel {
+    implementation "IDEKO-task-library.TrainModelNN";
+    // TODO remove in the DSL : generates metric1;
+  }
+
+}
+
+workflow IDEKO_main_WITH_RNN from IDEKO_main {
+
+  configure task TrainModel {
+    implementation "IDEKO-task-library.TrainModelRNN";
+  }
+
+}
+
+experiment EXP {
+
+    intent FindBestClassifier;
+
+    // 
+    control {
+        //Automated
+        S1 -> S2;
+    }
+
+    space S1 of IDEKO_main_WITH_NN {
+        strategy gridsearch;
+
+        param epochs_vp = range(80,90,5);
+        param batch_size_vp = enum(64, 128);
+
+        configure task TrainModel {
+             param epochs = epochs_vp;
+             param batch_size = batch_size_vp;
+        }
+    }
+
+    space S2 of IDEKO_main_WITH_RNN {
+        strategy gridsearch;
+
+        param epochs_vp = range(80,90,5);
+        param batch_size_vp = enum(64, 128);
+
+        configure task TrainModel {
+             param epochs = epochs_vp;
+             param batch_size = batch_size_vp;
+        }
+    }
+
+
+}

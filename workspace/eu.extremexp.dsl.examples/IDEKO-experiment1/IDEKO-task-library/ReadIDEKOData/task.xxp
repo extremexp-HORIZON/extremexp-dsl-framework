@@ -1,0 +1,17 @@
+// ----------------------------------------------------------
+// A reusable task to read data in the CSV format.
+//    It is a primitive task directly implemented in Python.
+//    The task requires input data (a file) and produces
+//     output data (the data read from the file).
+// ----------------------------------------------------------
+
+task ReadIDEKOData {
+    // defining the input data
+    define input data ExternalDataFileForIDEKO;
+
+    define output data X;
+    define output data Y;
+    define output data IndicatorList;
+
+    implementation "IDEKO-task-library/ReadIDEKOData/task.py";
+}

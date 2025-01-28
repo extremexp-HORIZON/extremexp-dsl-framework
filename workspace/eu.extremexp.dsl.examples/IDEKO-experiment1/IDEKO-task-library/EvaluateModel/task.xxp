@@ -1,0 +1,15 @@
+task EvaluateModel {
+
+    define input data TrainedModel;
+    define input data Features;
+    define input data Labels;
+	define output data LabelsTest;
+	define output data FeaturesTest;
+	
+    implementation "IDEKO-task-library/EvaluateModel/task.py";
+
+    metric recall {
+        type Integer;
+        kind scalar;
+    }
+}

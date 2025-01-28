@@ -2,241 +2,423 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
+
 Root:
-	package=ExperimentPackage | task=TaskPackage
+	(asPackage?= 'package' name=ID ';')?
+	(
+		workflows += Workflow		|
+		groups += Group				|
+		parameterTypes += ParameterType	|
+		experiments += Experiment
+	)* 
+	
 ;
 
-ExperimentPackage:
-	('package' name=ID ';')?
-	components += Component+
-;
-
-Component:
-	workflow=Workflow | assembledWorkflow=AssembledWorkflow |  experiment=Experiment
-;
-
+// workflow is an abstract class that can be extended by the following classes
 Workflow:
-    'workflow' name=ID '{'
-       	(
-       		tasks += Task				|
-       		data += Data				|
-       		operators += Operator		|	
-       		dataConfigs += DataConfig	|
-       		taskConfigs += TaskConfig	|
-       		nodeLinks += NodeLink		|
-       		dataLinks += DataLink		|
-       		metrics += Metric			|
-       		conditionalLinks += ConditionalLink
-       	)*
-    '}'
-;
-
-Task:
-	'define' 'task' name=ID ';'
+	CompositeWorkflow | TaskSpecification | AssembledWorkflow
 ;
 
 
-Data: 
-	'define' (output?='output'|input?='input')? 'data' name=ID
-	(assigned?=
-		'['
-		 'data'	'=' values+=Value (',' values+=Value)+	
-		']')? 
-	';'
+
+CompositeWorkflow:
+	'workflow' name=ID '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData						|	
+			outputs += OutputData					|
+			
+			// dedicated members
+			('define' 'task' tasks+= Task (','  tasks+= Task)* ';') |
+			dataConfigurations += DataConfiguration	|
+			taskConfigurations += TaskConfiguration	|
+			links += Link							|
+			dataLinks += DataLink					|
+			nodes += Node
+		)*
+	'}'
 ;
 
-Value:
-	STRING | INT | FLOAT | BOOL | NULL | ENUM | Range
+AssembledWorkflow:
+	'workflow' name=ID 'from' parent=[Workflow] '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 		|
+			
+			// dedicated members
+			taskConfigurations += TaskConfiguration	|
+			substitutedTask += SubstitutedTask
+		)*
+	'}'
 ;
 
-terminal FLOAT:
-	INT'.'INT
+TaskSpecification:
+	'task' name=ID '{'
+		(
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData		| 		
+			
+			// dedicated members
+			metrics += Metric			|
+			parameters += Parameter 	|
+			'implementation' implementation=STRING ';'	|
+			'dependency' dependency=STRING ';'
+		)*
+	'}'
 ;
 
-terminal BOOL:
-	'True'|'False'
-;
-
-terminal NULL:
-	'null'
-;
-
-Text:
-	INT | STRING
-;
-
-ENUM:
-    'enum''(' values+=Text (',' values+=Text)* ')'
-;
-
-Range:
-	'range' '(' minimum=INT ',' maximum=INT (',' step=INT )? ')'
-;
-Operator:
-	'define' 'operator' name=ID ';'
+Node:
+	Task | Event 
 ;
 
 
-DataConfig:
-	'configure' 'data' alias=[Data|ID] '{'
+// Data
+Data:
+	InputData | OutputData
+;
+InputData:
+	'define' 'input' 'data' name=ID ';' 
+;
+
+OutputData:
+	'define' 'output' 'data' name=ID ';' 
+;
+
+
+DataConfiguration:
+	'configure' 'data' data=[Data] '{'
 		'path' path=STRING ';'
 	'}'
 ;
 
-TaskConfig:
-    'configure' 'task' alias=[Task|ID] '{'
-        (
-        	params += Param |
-        	implementations += Implementation	|
-        	dependencies += Dependency	|
-        	subTaskConfigs += TaskConfig	|
-        	metrics += MetricGenerator	
-        )*
-    '}'
- ;
 
-Param:
- 	'param' name=ID (
- 		(assinged?='=' (value=Value | otherParam=[Param]))
- 		| (set?='{'
- 			'type' type=ID ';'
-	        'default' default=Value ';'
-	        (range=Range ';')?
- 		'}')
- 	)? ';'
- ;
- 
-Implementation:
- 	'implementation' (workflow=[Workflow]|filename=STRING) ';'
- ;
- 
-Dependency:
- 	'dependency' dependency=STRING ';'
- ;
-Node:
-	{Operator} | {Task}
+// Task
+SubstitutedTask:
+	'configure' task=Task
+;
+
+Task:
+	 name=ID 
+;
+
+TaskConfiguration:
+	{Task} 'configure' 'task' task=[Task] '{'
+	((
+			// shared members (i.e. super members)
+			inputs += InputData			|
+			outputs += OutputData 		|	
+			
+			// special members
+			('metadata''{' 	metadata += MetaData (',' metadata += MetaData)	 '}' )|
+			
+			// single members
+			'description' description=STRING ';'		|
+			'implementation' primitiveImplementation=STRING ';'	
+	
+
+	)* 
+	|
+	(notImplemented = '...'))
+	'}'
+;
+
+MetaData:
+	name=STRING ':' value=STRING
+;
+
+// Event
+Event:
+	eventValue=EventValue	
+;
+
+enum EventValue:
+	START='START' | END='END'
 ;
 
 
-NodeLink:
-	(started?='START' '->')?  
-	nodes+=[Node] ('->' nodes+=[Node])* 
-	(ended?='->' 'END')? ';'
-;
-
-QualifiedData:
-	node=[Node]'.'data=[Data]
-;
-
-Element:
-	 {Node} | {Data} 
+// Operator
+Operator:
+	Join | Parallel  | Exclusive | Inclusive 
 ;
 
 
+terminal JOIN_TERM:
+	'JOIN-'INT
+;
 
+terminal PARALLEL_TERM:
+	'PARALLEL-'INT
+;
+
+terminal EXCLUSIVE_TERM:
+	'EXCLUSIVE-'INT
+;
+
+terminal INCLUSIVE_TERM:
+	'INCLUSIVE-'INT
+;
+
+Join :
+    id=JOIN_TERM
+ ;
+
+Parallel :
+	id=PARALLEL_TERM
+;
+Exclusive :
+	id=EXCLUSIVE_TERM  
+;
+
+Inclusive :
+	id=INCLUSIVE_TERM 
+;
+
+
+LinkableNode returns Node:
+	ref=[Node] | Event | Operator
+;
+
+// Link
+Link:
+	ConditionalLink | RegularLink | ExceptionalLink
+;
+
+
+ConditionalLink:
+	input=LinkableNode '?->' output=LinkableNode '{'
+		(
+			"condition" condition=STRING ';'	|
+			"cases" cases+=Case+ 
+		)
+	'}'
+;
+
+RegularLink:
+	( input=LinkableNode) ('->' ouput+=LinkableNode)+ ';'
+;
+
+ExceptionalLink:
+	input=LinkableNode '!->' output=LinkableNode '{'
+		"event" event=STRING ';'
+	'}'
+;
+
+Case: 
+	case=STRING target=[Node] ';'
+;
+
+// we have to remove abstract tasks
+ComponentWithData:
+	TaskConfiguration | Workflow 
+;
+
+
+DataConnection:
+	(component=[ComponentWithData] fromComponent?='.')? ref=[Data]
+;
+
+// DataLink
+// TODO
+GlobalID:
+	ID('.'ID)?
+;
 DataLink:
-    (initialQualifiedData = QualifiedData | initialElement = [Element]  ) 
-    ('-->' 	(restElements += [Element] | restQualifiedElements+= QualifiedData) )+ ';'
+	inputData=GlobalID '-->' outputData=GlobalID';'
 ;
 
-
-ConditionalLink: 
-fromNode=[Node] '->' condition=STRING '?' trueNode=[Node]  ':' falseNode=[Node] '->' continuationNode=[Node] ';'
-
-;
-
-MetricType:
-	'blob'|'primitive'|'structure'|'field'|'series'
+// Parameter and Metric
+Parameter:
+	'param' name=ID '{'
+		(
+			('type' type=ParameterType ';')? 	&
+			('default' (defaultValueString=STRING | defaultValueInt=INT) ';')? &
+			((rangeValue=ParamValueRange | enumValue= ParamValueEnum) ';')? &
+			('constraint' valueConstraint=STRING ';')? 
+			
+		) 
+	'}'
 ;
 
 Metric:
-	'define' 'metric' name=ID ('as' type=MetricType )? ';'
+	'metric' name=ID '{'
+		(
+			('type' type=ParameterType ';')? &
+			('kind' kind=MetricKind ';')? 
+		)
+	'}'
 ;
 
-MetricGenerator:
-	'generates' metric=[Metric] ';'
+enum MetricKind:
+	series='series' | scalar='scalar'
+;
+
+// GROUP
+Group:
+	'group' name=ID '{'
+		tasks += Task
+	'}'
+;
+
+//ParameterType
+
+ParameterType:
+	Structure | PrimitiveType | Array
+;
+
+Structure:
+	'struct' name=ID '{'
+		fields += Field ';'
+	'}'
+;
+
+Field:
+	name=ID ('as' type=ParameterType)?
+;
+
+Array:
+	name=ID '['length=INT']' ('as' type=ParameterType)?
+;
+
+PrimitiveType returns ParameterType:
+	{PrimitiveType} ('Integer' | 'Boolean' | 'String' | 'Blob')
 ;
 
 
-GroupTask:  'group' name=ID '{' node+=[Node]* '}' ';' ;
 
 
-AssembledWorkflow:
-    'workflow' name=ID 'from' parentWorkflow=[Workflow] '{'
-        taskConfigs+=TaskConfig*
-    '}'
-;
 
-
+// Experiment DSL
 Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
-    	(control=Control)?
         (
-        	spaces += Space 	|
-        	events += Event
+        	tasks += ExperimentTask |
+        	interactions += Interaction	| 
+        	spaces += Space 			|
+        	control = Control
         )* 
+        
     '}'
 ;
 
-EventType: 
-	'automated' | 'manual'
+Interaction:
+	'interaction' name=ID '{'
+	    (
+			tasks += Action*	    	
+ 		|
+			(notImplemented = '...')
+		) 
+	'}' 
 ;
 
-Event:
-	'event' name=ID '{'
-	    'type' eventType=EventType ';'
-	    ('condition' condition=STRING ';')?
-	    'task' validation_task=STRING ';'
-	    ('restart' restart=BOOL ';')?
+TaskArgument:
+	string=STRING | id=ID
+;
+
+Action:
+	('task' taskName=ID '(' (arguments+=TaskArgument (',' arguments+=TaskArgument)*)? ')' ';')
+	
+;
+
+ExperimentTask:
+	'task' name=ID '{'
+		(
+			( 
+				'implementation' implementaion=STRING ';' | 
+				tasks += Action
+			)*
+		|
+			(notImplemented = '...')
+		)  
 	'}'
 ;
 
 Space:
-    'space' name=ID 'of' assembled_workflow=[AssembledWorkflow] '{'
-        'strategy' strategy_name=Strategy ';'
-        (
-        	params+=Param	|
-        	tasks+=TaskConfig
-        )*
+    'space' name=ID 'of' assembledWorkflow=[AssembledWorkflow] '{'
+		(
+			( 
+				'strategy' strategy=ID ';' 	|
+				params += Param				|		
+				taskConfigurations += ExperimentTaskConfiguraiton 
+				
+			)*
+		|
+			(notImplemented = '...')
+		)  
         
-    '}';
+    '}'
+;
+ExperimentTaskConfiguraiton:
+	'configure' 'task' task=[Task] '{'
+		(
+			( 
+				params += Param
+				
+			)*
+		|
+			(notImplemented = '...')
+		)  
+        
+    '}'
+	
+;
 
-Strategy: 
-	{Strategy} ('gridsearch' |  'randomsearch' ('runs' '=' runs=INT)?)
+Param:
+	'param' name=ID (assigned?='=' (value=ParamValue | ref=[Param|ID]))? ';' 
+;
+
+ParamValue:
+	rangeValue=ParamValueRange | enumValue=ParamValueEnum | stringValue=STRING | listValue=ParamValueList
+;
+ParamValueRange:
+	'range' '('start=INT ',' end=INT (',' step=INT)?')'
+;
+ParamValueEnum:
+	'enum' '(' values+=PrimitiveValue (',' values+=PrimitiveValue)* ')'
+;
+ParamValueList:
+	'[' values+=PrimitiveValue (',' values+=PrimitiveValue)* ']'
+;
+PrimitiveValue:
+	INT | STRING | FLOAT
+;
+
+terminal FLOAT:
+	'-'? INT '.' INT
 ;
 
 
 Control:
-        {Control} 'control' '{'
-               expLink+=ExpLink*
-        '}';
+        {Control}'control' '{'
+        (
+			flows += ExperimentFlow*
+			
+			|
+			(notImplemented = '...')
+		)  
+		'}'
+;
 
+ExperimentFlow:
+	RegularExpLink | ConditionalExpLink
+;
 
-ExpLink:  RegularExpLink | ConditionalExpLink;
-
-ExpNode:
-	{Space} | {Event}
+ExperimentNode:
+	Space | Interaction
 ;
 
 RegularExpLink:
 	(started?='START' '->')?  
-	nodes+=[ExpNode] ('->' nodes+=[ExpNode])* 
+	(nodes+=[ExperimentNode] | parallelNodes+=ParallelNodes) ('->' (nodes+=[ExperimentNode] | parallelNodes+=ParallelNodes))* 
 	(ended?='->' 'END')? ';'
 ;
-
+ParallelNodes:
+	'(' nodes+=[ExperimentNode] ('||' nodes+=[ExperimentNode])+ ')' 
+;
 
 ConditionalExpLink:
-    fromNode=[ExpNode] '?->' toNode=[ExpNode] '{' 'condition' condition=STRING '}' ';'
+    fromNode=[ExperimentNode] '?->' toNode=[ExperimentNode] '{' 'condition' condition=STRING '}' ';'
 ;
 
-TaskPackage:
-	'task' name=ID '{'
-        (
-        	data+=Data		|
-        	implementations+=Implementation	|
-        	dependencies += Dependency		|
-        	params+=Param
-        )*
-    '}'
-;
