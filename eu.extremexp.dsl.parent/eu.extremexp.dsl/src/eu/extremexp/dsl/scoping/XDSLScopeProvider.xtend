@@ -209,33 +209,33 @@ class XDSLScopeProvider extends AbstractDeclarativeScopeProvider  {
 //			}
 
 			// Find tasks from all parent Workflow s
-			if (context instanceof TaskConfiguration){
-				if (context.eContainer instanceof AssembledWorkflow){
-					var fromCompositeWorkflow = context.eContainer as Workflow
-					
-					while (!(fromCompositeWorkflow instanceof CompositeWorkflow) && (fromCompositeWorkflow !== null)){
-						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
-					}
-					if (fromCompositeWorkflow instanceof CompositeWorkflow){
-						return Scopes.scopeFor(fromCompositeWorkflow.tasks)
-					}
-				}
-			}
-			
-			// find tasks from all space-workflow connection
-			if (context instanceof ExperimentTaskConfiguraiton){
-				val space = context.eContainer
-				if (space instanceof Space){
-					var fromCompositeWorkflow = space.assembledWorkflow as Workflow
-					
-					while (!(fromCompositeWorkflow instanceof CompositeWorkflow)  && (fromCompositeWorkflow !== null)){
-						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
-					}
-					if (fromCompositeWorkflow instanceof CompositeWorkflow){
-						return Scopes.scopeFor(fromCompositeWorkflow.tasks)
-					}
-				}
-			}
+//			if (context instanceof TaskConfiguration){
+//				if (context.eContainer instanceof AssembledWorkflow){
+//					var fromCompositeWorkflow = context.eContainer as Workflow
+//					
+//					while ((fromCompositeWorkflow instanceof AssembledWorkflow) && (fromCompositeWorkflow !== null)){
+//						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
+//					}
+//					if (fromCompositeWorkflow instanceof CompositeWorkflow){
+//						return Scopes.scopeFor(fromCompositeWorkflow.tasks)
+//					}
+//				}
+//			}
+//			
+//			// find tasks from all space-workflow connection
+//			if (context instanceof ExperimentTaskConfiguraiton){
+//				val space = context.eContainer
+//				if (space instanceof Space){
+//					var fromCompositeWorkflow = space.assembledWorkflow as Workflow
+//					
+//					while ((fromCompositeWorkflow !== null) && (fromCompositeWorkflow instanceof AssembledWorkflow)){
+//						fromCompositeWorkflow = ((fromCompositeWorkflow) as AssembledWorkflow).parent
+//					}
+//					if (fromCompositeWorkflow instanceof CompositeWorkflow){
+//						return Scopes.scopeFor(fromCompositeWorkflow.tasks)
+//					}
+//				}
+//			}
 			
 			// If we are looking at data point of a task to use in data link
 //			if (context instanceof DataLink){

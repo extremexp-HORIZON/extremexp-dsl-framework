@@ -3,9 +3,14 @@
  */
 package eu.extremexp.dsl
 
+import org.eclipse.xtext.scoping.IGlobalScopeProvider
+import eu.extremexp.dsl.scoping.XDSLGlobalScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class XDSLRuntimeModule extends AbstractXDSLRuntimeModule {
+    override Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
+        XDSLGlobalScopeProvider
+    }
 }

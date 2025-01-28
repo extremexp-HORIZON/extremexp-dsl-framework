@@ -7,6 +7,7 @@ workflow IDEKO_main {
   define task TrainModel;
   define task EvaluateModel;
 
+
   // Task CONNECTIONS
   START -> ReadData -> PrepareData -> TrainModel -> EvaluateModel -> END;
 
