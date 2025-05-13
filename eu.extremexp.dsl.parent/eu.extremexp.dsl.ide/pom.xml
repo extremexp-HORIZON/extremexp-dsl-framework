@@ -165,7 +165,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -194,7 +194,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
+				<version>3.6.0</version>
 				<configuration>
 					<transformers>
 						<transformer
@@ -264,7 +264,7 @@
 		<dependency>
 	    <groupId>org.eclipse.lsp4j</groupId>
 		    <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-		    <version>0.23.1</version>
+		    <version>0.24.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>

@@ -7,13 +7,13 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<xtextVersion>2.32.0</xtextVersion>
-		<mwe2Version>2.15.0</mwe2Version>
+		<xtextVersion>2.38.0</xtextVersion>
+		<mwe2Version>2.22.0</mwe2Version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<!-- Tycho settings -->
-		<tycho-version>4.0.8</tycho-version>
+		<tycho-version>4.0.9</tycho-version>
 		<!-- Define overridable properties for tycho-surefire-plugin -->
 		<platformSystemProperties></platformSystemProperties>
 		<moduleProperties></moduleProperties>
@@ -120,7 +120,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.4.1</version>
 					<configuration>
 						<filesets>
 							<fileset>
