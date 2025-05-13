@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: eu.extremexp.dsl.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: eu.extremexp.dsl.tests
-Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.202408060815
+Bundle-Vendor: ExtremeXp
+Bundle-Version: 1.0.0.202505131042
 Bundle-SymbolicName: eu.extremexp.dsl.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: eu.extremexp.dsl,org.eclipse.xtext.testing,org.eclipse.x
@@ -11,5 +11,5 @@ Require-Bundle: eu.extremexp.dsl,org.eclipse.xtext.testing,org.eclipse.x
 Import-Package: org.junit.jupiter.api;version="[5.1.0,6.0.0)",org.junit.
  jupiter.api.extension;version="[5.1.0,6.0.0)"
 Export-Package: eu.extremexp.dsl.tests;x-internal=true
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=23))"
 
