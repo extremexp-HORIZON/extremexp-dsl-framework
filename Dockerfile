@@ -1,27 +1,32 @@
-FROM openjdk:17-jdk-slim
 
-ENV LANG C.UTF-8
-ENV JAVA_TOOL_OPTIONS -XX:+UseContainerSupport
+FROM debian:bookworm-slim
 
-# we dont need vim for release
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    unzip \
-    vim\
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    wget curl unzip tar git ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install OpenJDK 23 (early access)
+RUN wget  https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_linux-x64_bin.tar.gz && \
+    tar -xzf openjdk-23.0.2_linux-x64_bin.tar.gz && \
+    mv jdk-23.0.2 /opt/openjdk-23 && \
+    rm openjdk-23.0.2_linux-x64_bin.tar.gz
+
+ENV JAVA_HOME=/opt/openjdk-23
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Install Maven 3.9.9
+ENV MAVEN_VERSION=3.9.9
+ENV MAVEN_HOME=/opt/maven
+
+RUN wget https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    tar -xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    mv apache-maven-${MAVEN_VERSION} ${MAVEN_HOME} && \
+    rm apache-maven-${MAVEN_VERSION}-bin.tar.gz
+
+ENV PATH="${MAVEN_HOME}/bin:${PATH}"
 
 WORKDIR /opt
-
-# the actual project use mvn-3.8, but we can use a newer one with tycho 4.0.8
-RUN wget https://apache.osuosl.org/maven/maven-3/3.9.7/binaries/apache-maven-3.9.7-bin.zip \
-    && unzip apache-maven-3.9.7-bin.zip \
-    && mv apache-maven-3.9.7 /opt/maven \
-    && ln -s /opt/maven/bin/mvn /usr/bin/mvn \
-    && rm apache-maven-3.9.7-bin.zip
-
-ENV MAVEN_HOME /opt/maven
-ENV PATH $MAVEN_HOME/bin:$PATH
 
 COPY . /opt/extremexp-dsl-framework
 
