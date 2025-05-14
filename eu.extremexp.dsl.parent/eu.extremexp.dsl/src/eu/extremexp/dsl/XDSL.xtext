@@ -29,9 +29,8 @@ CompositeWorkflow:
 			outputs += OutputData					|
 			
 			// dedicated members
-			('define' 'task' tasks+= Task (','  tasks+= Task)* ';') |
+			tasks += Task							|
 			dataConfigurations += DataConfiguration	|
-			taskConfigurations += TaskConfiguration	|
 			links += Link							|
 			dataLinks += DataLink					|
 			nodes += Node
@@ -47,8 +46,7 @@ AssembledWorkflow:
 			outputs += OutputData 		|
 			
 			// dedicated members
-			taskConfigurations += TaskConfiguration	|
-			substitutedTask += SubstitutedTask
+			taskConfigurations += TaskConfiguration
 		)*
 	'}'
 ;
@@ -79,49 +77,51 @@ Data:
 	InputData | OutputData
 ;
 InputData:
-	'define' 'input' 'data' name=ID ';' 
+	'define' 'input' 'data' name=ID ';'
 ;
 
 OutputData:
 	'define' 'output' 'data' name=ID ';' 
 ;
 
-
 DataConfiguration:
 	'configure' 'data' data=[Data] '{'
-		'path' path=STRING ';'
+	('path' path=STRING ';' | 'type' type=STRING ';' | 'default' defaultValue=ParamValue ';'  )*
+	
 	'}'
 ;
 
 
-// Task
-SubstitutedTask:
-	'configure' task=Task
-;
-
 Task:
-	 name=ID 
+	 (abstract?='task' name=ID ';') |
+	 (configured?='task' name=ID taskConfiguration=TaskConfigurationBody) 
 ;
 
-TaskConfiguration:
-	{Task} 'configure' 'task' task=[Task] '{'
+TaskConfigurationBody:
+	{TaskConfigurationBody}'{'
 	((
 			// shared members (i.e. super members)
 			inputs += InputData			|
 			outputs += OutputData 		|	
+			params += Param				|
 			
 			// special members
 			('metadata''{' 	metadata += MetaData (',' metadata += MetaData)	 '}' )|
 			
 			// single members
 			'description' description=STRING ';'		|
-			'implementation' primitiveImplementation=STRING ';'	
+			'implementation' primitiveImplementation=STRING ';'	|
+			'subworkflow' subworkflow=STRING ';'				|
+			'dependency' dependency=STRING ';'
 	
-
 	)* 
 	|
 	(notImplemented = '...'))
 	'}'
+;
+
+TaskConfiguration:
+	'task' task=[Task|ID] taskConfiguration=TaskConfigurationBody
 ;
 
 MetaData:
@@ -294,10 +294,10 @@ Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
         (
-        	tasks += ExperimentTask |
         	interactions += Interaction	| 
         	spaces += Space 			|
-        	control = Control
+        	control = Control 			|
+        	tasks += ExperimentTask 
         )* 
         
     '}'
@@ -313,34 +313,26 @@ Interaction:
 	'}' 
 ;
 
-TaskArgument:
+ActionArgument:
 	string=STRING | id=ID
 ;
 
 Action:
-	('task' taskName=ID '(' (arguments+=TaskArgument (',' arguments+=TaskArgument)*)? ')' ';')
+	('action' actionName=ID '(' (arguments+=ActionArgument (',' arguments+=ActionArgument)*)? ')' ';')
 	
 ;
 
-ExperimentTask:
-	'task' name=ID '{'
-		(
-			( 
-				'implementation' implementaion=STRING ';' | 
-				tasks += Action
-			)*
-		|
-			(notImplemented = '...')
-		)  
-	'}'
+Attribute:
+	name=ID '=' attributeValue=ParamValue ';'
 ;
 
 Space:
-    'space' name=ID 'of' assembledWorkflow=[AssembledWorkflow] '{'
+    'space' name=ID 'of' assembledWorkflow=[Workflow] '{'
 		(
 			( 
 				'strategy' strategy=ID ';' 	|
-				params += Param				|		
+				params += Param				|
+				attributes += Attribute		|		
 				taskConfigurations += ExperimentTaskConfiguraiton 
 				
 			)*
@@ -350,19 +342,26 @@ Space:
         
     '}'
 ;
-ExperimentTaskConfiguraiton:
-	'configure' 'task' task=[Task] '{'
-		(
-			( 
-				params += Param
-				
-			)*
-		|
-			(notImplemented = '...')
-		)  
-        
-    '}'
+
+ExperimentTask:
+	 (abstract?='task' name=ID ';') |
+	 (configured?='task' name=ID taskConfiguration=TaskConfigurationBody) 
+;
+
+ExperimentTaskConfiguraitonBody:
+	{ExperimentTaskConfiguraitonBody}'{'
+	((
+			// shared members (i.e. super members)
+			params += Param
 	
+	)* 
+	|
+	(notImplemented = '...'))
+	'}'
+;
+
+ExperimentTaskConfiguraiton:
+	'task' task=[Task|ID] taskConfiguration=ExperimentTaskConfiguraitonBody
 ;
 
 Param:
@@ -370,7 +369,7 @@ Param:
 ;
 
 ParamValue:
-	rangeValue=ParamValueRange | enumValue=ParamValueEnum | stringValue=STRING | listValue=ParamValueList
+	rangeValue=ParamValueRange | enumValue=ParamValueEnum | primitiveValue=PrimitiveValue | listValue=ParamValueList
 ;
 ParamValueRange:
 	'range' '('start=INT ',' end=INT (',' step=INT)?')'
@@ -382,13 +381,17 @@ ParamValueList:
 	'[' values+=PrimitiveValue (',' values+=PrimitiveValue)* ']'
 ;
 PrimitiveValue:
-	INT | STRING | FLOAT
+	INT | STRING | FLOAT | BOOLEAN
 ;
 
 terminal FLOAT:
 	'-'? INT '.' INT
 ;
 
+
+terminal BOOLEAN:
+	'true' | 'false'
+;
 
 Control:
         {Control}'control' '{'
@@ -406,7 +409,7 @@ ExperimentFlow:
 ;
 
 ExperimentNode:
-	Space | Interaction
+	Space | Interaction | ExperimentTask
 ;
 
 RegularExpLink:
