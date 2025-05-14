@@ -8,12 +8,12 @@
 
 	<properties>
 		<xtextVersion>2.38.0</xtextVersion>
-		<mwe2Version>2.22.0</mwe2Version>
+		<mwe2Version>2.21.0</mwe2Version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<!-- Tycho settings -->
-		<tycho-version>4.0.9</tycho-version>
+		<tycho-version>4.0.12</tycho-version>
 		<!-- Define overridable properties for tycho-surefire-plugin -->
 		<platformSystemProperties></platformSystemProperties>
 		<moduleProperties></moduleProperties>
@@ -25,8 +25,6 @@
 		<module>eu.extremexp.dsl.ide</module>
 		<module>eu.extremexp.dsl.ui</module>
 		<module>eu.extremexp.dsl.target</module>
-		<module>eu.extremexp.dsl.tests</module>
-		<module>eu.extremexp.dsl.ui.tests</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -81,7 +79,7 @@
 							<requirement>
 								<type>eclipse-plugin</type>
 								<id>org.eclipse.xtext.logging</id>
-								<versionRange>1.2.24</versionRange>
+								<versionRange>0.0.0</versionRange>
 							</requirement>
 							<!-- to get the org.eclipse.osgi.compatibility.state plugin if the target
 								platform is Luna or later. (backward compatible with kepler and previous
@@ -120,7 +118,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.2.0</version>
 					<configuration>
 						<filesets>
 							<fileset>
@@ -130,39 +128,6 @@
 								</includes>
 							</fileset>
 						</filesets>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											build-helper-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.9.1,)
-										</versionRange>
-										<goals>
-											<goal>add-resource</goal>
-											<goal>add-source</goal>
-											<goal>add-test-resource</goal>
-											<goal>add-test-source</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -295,16 +260,5 @@
 	</profiles>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.xtext</groupId>
-			<artifactId>org.eclipse.xtext.ide</artifactId>
-			<version>${xtextVersion}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.eclipse.lsp4j</groupId>
-					<artifactId>org.eclipse.lsp4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
 </project>

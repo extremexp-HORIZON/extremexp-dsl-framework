@@ -8,17 +8,16 @@
 	</parent>
 	<artifactId>eu.extremexp.dsl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<dependencies>
-		
-	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
+						<?m2e ignore?>
 						<id>mwe2Launcher</id>
 						<phase>generate-sources</phase>
 						<goals>
@@ -40,10 +39,9 @@
 				<dependencies>
 					<dependency>
 						<groupId>org.eclipse.xtext</groupId>
-						<artifactId>xtext-antlr-generator</artifactId>
-						<version>2.1.1</version>
+						<artifactId>org.eclipse.xtext.xtext.generator.dependencies</artifactId>
+						<version>${xtextVersion}</version>
 					</dependency>
-	
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -63,12 +61,6 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../eu.extremexp.dsl.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
 							<directory>${basedir}/../eu.extremexp.dsl.ide/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
@@ -81,52 +73,12 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../eu.extremexp.dsl.ui.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
 							<directory>${basedir}/model/generated/</directory>
 						</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											exec-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.2.1,)
-										</versionRange>
-										<goals>
-											<goal>java</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 </project>
