@@ -4,7 +4,6 @@ generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 
 Root:
-	(asPackage?= 'package' name=ID ';')?
 	(
 		workflows += Workflow		|
 		groups += Group				|
@@ -294,13 +293,18 @@ Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
         (
+        	refs += Reference |
         	interactions += Interaction	| 
         	spaces += Space 			|
         	control = Control 			|
-        	tasks += ExperimentTask 
+        	tasks += Task 
         )* 
         
     '}'
+;
+
+Reference:
+	'ref' ref=STRING ';'
 ;
 
 Interaction:
@@ -333,7 +337,7 @@ Space:
 				'strategy' strategy=ID ';' 	|
 				params += Param				|
 				attributes += Attribute		|		
-				taskConfigurations += ExperimentTaskConfiguraiton 
+				taskConfigurations += TaskConfiguration 
 				
 			)*
 		|
@@ -343,26 +347,7 @@ Space:
     '}'
 ;
 
-ExperimentTask:
-	 (abstract?='task' name=ID ';') |
-	 (configured?='task' name=ID taskConfiguration=TaskConfigurationBody) 
-;
 
-ExperimentTaskConfiguraitonBody:
-	{ExperimentTaskConfiguraitonBody}'{'
-	((
-			// shared members (i.e. super members)
-			params += Param
-	
-	)* 
-	|
-	(notImplemented = '...'))
-	'}'
-;
-
-ExperimentTaskConfiguraiton:
-	'task' task=[Task|ID] taskConfiguration=ExperimentTaskConfiguraitonBody
-;
 
 Param:
 	'param' name=ID (assigned?='=' (value=ParamValue | ref=[Param|ID]))? ';' 
@@ -409,7 +394,7 @@ ExperimentFlow:
 ;
 
 ExperimentNode:
-	Space | Interaction | ExperimentTask
+	Space | Interaction | Task
 ;
 
 RegularExpLink:

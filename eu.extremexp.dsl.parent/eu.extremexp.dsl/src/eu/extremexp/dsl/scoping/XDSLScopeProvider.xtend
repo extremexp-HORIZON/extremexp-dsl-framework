@@ -11,8 +11,13 @@ import eu.extremexp.dsl.xDSL.Workflow
 import eu.extremexp.dsl.xDSL.CompositeWorkflow
 import eu.extremexp.dsl.xDSL.AssembledWorkflow
 import org.eclipse.xtext.scoping.Scopes
-import eu.extremexp.dsl.xDSL.ExperimentTaskConfiguraiton
 import eu.extremexp.dsl.xDSL.Space
+import org.eclipse.emf.ecore.resource.Resource
+import eu.extremexp.dsl.xDSL.Experiment
+import eu.extremexp.dsl.xDSL.Reference
+import org.eclipse.emf.common.util.URI
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * This class contains custom scoping description.
@@ -42,6 +47,18 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 	}
 	
 	override getScope(EObject context, EReference reference){
+		if (context instanceof AssembledWorkflow){
+			if (reference == XDSLPackage.Literals.ASSEMBLED_WORKFLOW__PARENT){
+				val workflows = newArrayList
+				 context.eResource.allContents.filter[t | t instanceof Workflow].forEach[t  |
+				 	workflows += t
+					
+				]
+				return Scopes.scopeFor(workflows)
+
+			}
+		}
+		
 		if (context instanceof TaskConfiguration){
 			if (reference == XDSLPackage.Literals.TASK_CONFIGURATION__TASK){
 				var container = context.eContainer
@@ -53,12 +70,6 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 						return Scopes.scopeFor(parentWorkflow.tasks)
 					}
 				}
-			}
-		}
-		
-		if (context instanceof ExperimentTaskConfiguraiton){
-			if (reference == XDSLPackage.Literals.EXPERIMENT_TASK_CONFIGURAITON__TASK){
-				var container = context.eContainer
 				
 				if (container instanceof Space){
 					var parentWorkflow = getParentWorkflow(container.assembledWorkflow)
@@ -69,6 +80,42 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 				}
 			}
 		}
+		
+		if (context instanceof Space){
+			if (reference == XDSLPackage.Literals.SPACE__ASSEMBLED_WORKFLOW){
+				// Resolve workflows from external refs declared in the parent Experiment
+				val experiment = context.eContainer as Experiment
+				if (experiment !== null){
+					val workflows = newArrayList
+					// first add local workflows
+					experiment.eResource.allContents.filter[t | t instanceof Workflow].forEach[t |
+						workflows += t
+					]
+					
+					// then add ref workflows
+					for (refObj : experiment.refs){
+						val path = (refObj as Reference).ref
+						if (path !== null && !path.trim.empty){
+							val baseURI = experiment.eResource.URI
+							if (baseURI.platform){
+								val projectName = baseURI.segment(1)
+								val fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
+								var resource = experiment.eResource.resourceSet.getResource(fileURI, true)
+								resource.allContents.filter[t | t instanceof Workflow].forEach[t | 
+									workflows += t
+								]
+							}
+							else {
+								
+							}
+						}
+					}
+					return Scopes.scopeFor(workflows)
+				}
+			}
+		}
+		
+
 		
 		return super.getScope(context, reference); 
 	}

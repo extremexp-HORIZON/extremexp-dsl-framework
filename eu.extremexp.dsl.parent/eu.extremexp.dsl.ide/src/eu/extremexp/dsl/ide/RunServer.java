@@ -67,7 +67,7 @@ public class RunServer {
         	}
         }
         System.out.println("LSP Activated on port: " + RunServer.port);
-        System.out.println("DSL Language Version: 5.0");
+        System.out.println("DSL Language Version: 6.0");
         
         try (final AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port))) {
             System.out.println("LSP listening on " + port);
