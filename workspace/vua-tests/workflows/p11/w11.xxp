@@ -1,0 +1,9 @@
+workflow w1 {
+	task t1;
+	
+}
+workflow w2 from w1 {
+	task t1{
+				
+	}
+}

@@ -21,21 +21,31 @@ class XDSLValidator extends AbstractXDSLValidator {
 	@Check
 	def checkRefFileExist(Reference refObj) {
 		val path = refObj.ref
+		val experiment = refObj.eContainer as Experiment
 		if (path !== null && !path.trim.empty){
-			val experiment = refObj.eContainer as Experiment
-			val baseURI =experiment.eResource.URI
+			val baseURI = experiment.eResource.URI
+			var fileURI = URI.createFileURI(path)
 			if (baseURI.platform){
 				val projectName = baseURI.segment(1)
-				val fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
-				try{
-					var resource = experiment.eResource.resourceSet.getResource(fileURI, true)
+				fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
+				
+			}
+			else{
+				val workspacePath = System.getenv("SHARED_WORKSPACE_PATH")
+				fileURI = URI.createFileURI(workspacePath + "/" + path)
+				
+			}
+	
+			try{
+				
+				val resource = experiment.eResource.resourceSet.getResource(fileURI, true)
 				}
-				catch (Exception e){
-					warning('Cannot find file ' + refObj.ref , 
-					XDSLPackage.Literals.REFERENCE__REF,
-					INVALID_FILE)
-				}
+				
+			catch (Exception e){
+				warning('Cannot find file ' + refObj.ref , 
+				XDSLPackage.Literals.REFERENCE__REF,
+				INVALID_FILE)
 			}
 		}
-	}	
+	}
 }

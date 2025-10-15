@@ -1,0 +1,374 @@
+
+// ************************************************************************************************
+// * MAIN BINARY
+// ************************************************************************************************
+
+workflow main_binary {
+
+  // Task CONNECTIONS
+  START -> ReadDataBinary -> PrepareDataBinary -> TrainModelBinary -> EvaluateModelBinary -> END;
+
+  task TrainModelBinary;
+
+  task ReadDataBinary {
+    implementation "UC5.binary.ReadData";
+  }
+
+  task EvaluateModelBinary {
+    implementation "UC5.binary.EvaluateModel";
+  }
+
+  task PrepareDataBinary {
+    subworkflow "uc5_binary_DataPreprocessing";
+  }
+
+  
+  // DATA
+  define input data ExternalDataFileBinary;
+
+  // DATA CONNECTIONS
+  ExternalDataFileBinary --> ReadDataBinary.FileToRead;
+
+  configure data ExternalDataFileBinary {
+    path "UC5/training/**";
+  }
+
+  define output data TrainedModelFolderBinary;
+
+  TrainModelBinary.OutputFolder --> TrainedModelFolderBinary;
+
+  configure data TrainedModelFolderBinary {
+    path "output/trained_model/**";
+    type "generated-ML-model";
+  }
+
+    ReadDataBinary.X41 --> PrepareDataBinary.X2;
+    ReadDataBinary.Y --> PrepareDataBinary.Y;
+    ReadDataBinary.IndicatorList --> PrepareDataBinary.IndicatorList;
+
+    PrepareDataBinary.Timestamps42 --> TrainModelBinary.Timestamps;
+    PrepareDataBinary.Features --> TrainModelBinary.Features;
+    PrepareDataBinary.XTrain --> TrainModelBinary.XTrain;
+    PrepareDataBinary.XTest --> TrainModelBinary.XTest;
+    PrepareDataBinary.YTrain --> TrainModelBinary.YTrain;
+    PrepareDataBinary.YTest --> TrainModelBinary.YTest;
+    PrepareDataBinary.XPad --> TrainModelBinary.XPad;
+    PrepareDataBinary.YPad --> TrainModelBinary.YPad;
+
+    TrainModelBinary.OutputFolder --> EvaluateModelBinary.OutputFolder;
+    TrainModelBinary.XTest --> EvaluateModelBinary.XTest;
+    TrainModelBinary.YTest --> EvaluateModelBinary.YTest;
+    TrainModelBinary.XPad --> EvaluateModelBinary.XPad;
+    TrainModelBinary.YPad --> EvaluateModelBinary.YPad;
+    TrainModelBinary.Timestamps --> EvaluateModelBinary.Timestamps2;
+    TrainModelBinary.Features --> EvaluateModelBinary.Features;
+    TrainModelBinary.model_path --> EvaluateModelBinary.model_path;
+
+}
+// ************************************************************************************************
+// * MAIN MUTICLASS
+// ************************************************************************************************
+
+workflow main_multiclass {
+
+  // Task CONNECTIONS
+  START -> ReadData -> PrepareData -> TrainModel -> EvaluateModel -> END;
+
+  task TrainModel;
+
+  task ReadData {
+    implementation "UC5.multiclass.ReadData";
+  }
+
+  task EvaluateModel {
+    implementation "UC5.multiclass.EvaluateModel";
+  }
+
+  task PrepareData {
+    subworkflow "uc5_multiclass_DataPreprocessing";
+  }
+
+  // DATA
+  define input data ExternalDataFile;
+
+  // DATA CONNECTIONS
+  ExternalDataFile --> ReadData.FileToRead;
+
+  configure data ExternalDataFile {
+    path "UC5/training/**";
+  }
+
+  define output data TrainedModelFolder;
+
+  TrainModel.OutputFolder --> TrainedModelFolder;
+
+  configure data TrainedModelFolder {
+    path "output/trained_model/**";
+    type "generated-ML-model";
+  }
+
+    ReadData.X41 --> PrepareData.X2;
+    ReadData.Y --> PrepareData.Y;
+    ReadData.IndicatorList --> PrepareData.IndicatorList;
+
+    PrepareData.Timestamps42 --> TrainModel.Timestamps;
+    PrepareData.Features --> TrainModel.Features;
+    PrepareData.n_classes --> TrainModel.n_classes;
+    PrepareData.XTrain --> TrainModel.XTrain;
+    PrepareData.XTest --> TrainModel.XTest;
+    PrepareData.YTrain --> TrainModel.YTrain;
+    PrepareData.YTest --> TrainModel.YTest;
+    PrepareData.XPad --> TrainModel.XPad;
+    PrepareData.YPad --> TrainModel.YPad;
+
+    TrainModel.OutputFolder --> EvaluateModel.OutputFolder;
+    TrainModel.XTest --> EvaluateModel.XTest;
+    TrainModel.YTest --> EvaluateModel.YTest;
+    TrainModel.XPad --> EvaluateModel.XPad;
+    TrainModel.YPad --> EvaluateModel.YPad;
+    TrainModel.Timestamps --> EvaluateModel.Timestamps2;
+    TrainModel.Features --> EvaluateModel.Features;
+    TrainModel.n_classes --> EvaluateModel.n_classes;
+
+}
+
+workflow machine_files_load {
+
+  // Task CONNECTIONS
+  START -> MachineData -> END;
+
+  task MachineData;
+
+  // DATA VALIDATION
+  define input data MachineDataFiles;
+
+  configure data MachineDataFiles {
+    path "UC5/machine_files/**";
+  }
+
+  MachineDataFiles --> MachineData.FileToValidate;
+}
+
+
+// ************************************************************************************************
+// * TRAINMODELS BINARY
+// ************************************************************************************************
+
+workflow TrainModelNN_B from main_binary {
+  task TrainModelBinary {
+    implementation "UC5.binary.TrainModelNN";
+  }
+}
+
+workflow TrainModelRNN_B from main_binary {
+  task TrainModelBinary {
+    implementation "UC5.binary.TrainModelRNN";
+  }
+}
+
+workflow TrainModelCNN_B from main_binary {
+  task TrainModelBinary {
+    implementation "UC5.binary.TrainModelCNN";
+  }
+}
+
+workflow TrainModelNN_M from main_multiclass {
+  task TrainModel {
+    implementation "UC5.multiclass.TrainModelNN";
+  }
+}
+
+workflow TrainModelRNN_M from main_multiclass {
+  task TrainModel {
+    implementation "UC5.multiclass.TrainModelRNN";
+  }
+}
+
+workflow TrainModelCNN_M from main_multiclass {
+  task TrainModel {
+    implementation "UC5.multiclass.TrainModelCNN";
+  }
+}
+
+workflow MachineDataLoad from machine_files_load {
+  task MachineData {
+    implementation "UC5.V1_MachineDataLoad";
+  }
+}
+
+
+// ************************************************************************************************
+// * EXPERIMENTO
+// ************************************************************************************************
+
+experiment EXP {
+  intent FindBestClassifier;
+  control {
+
+    // Run all the MULTICLASS spaces, get the best model and save it
+    //START -> S1M -> S2M -> S3M -> BestModelEvaluator;
+    START -> S1M -> S2M -> BestModelEvaluator;
+
+    // The model is good, we keep the multiclass
+    BestModelEvaluator ?-> V1 { condition "check_results_more_than 0.75"};
+
+    // If the condition meet, go to the BINARY ONE
+    BestModelEvaluator ?-> S1B { condition "check_results_less_or_equal_than 0.75"};
+
+    // Get the best model for the BINARY
+    //S1B -> S2B -> S3B -> V1;
+    S1B -> S2B -> V1;
+
+    // We have the best model, pass the machiles and files and run the user interaction task
+    V1 -> SelectBestModelAndPassMachineFiles -> I1 -> END;
+    //V1 -> SelectBestModelAndPassMachineFiles -> END;
+
+    // BestModelEvaluator es best_model_evaluator
+    // V1 es MachineDataLoad
+    // SelectBestModelAndPassMachineFiles es Coger el mejor y PassMachineFilesThroughTheBestModel
+    // I2 es user interaction
+
+  }
+
+  // ************************************************************************************************
+  // * SPACES BINARY
+  // ************************************************************************************************
+
+  space S1B of TrainModelNN_B {
+    strategy gridsearch;
+    // param epochs_vp = range(2, 4);
+    param epochs_vp = enum(100);
+    param batch_size_vp = enum(32);
+    param units_1_vp = enum(100);
+    param units_2_vp = enum(100);
+    param units_3_vp = enum(100);
+    param activation_function_vp = enum("relu");
+    task TrainModelBinary {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param units_1 = units_1_vp;
+      param units_2 = units_2_vp;
+      param units_3 = units_3_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+  space S2B of TrainModelCNN_B {
+    strategy gridsearch;
+    param epochs_vp = enum(70);
+    param batch_size_vp = enum(32);
+    param filters_1_vp = enum(256);
+    param filters_2_vp = enum(256);
+    param kernel_size_vp = enum(3);
+    param pool_size_vp = enum(2);
+    param activation_function_vp = enum("relu");
+    task TrainModelBinary {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param filters_1 = filters_1_vp;
+      param filters_2 = filters_2_vp;
+      param kernel_size = kernel_size_vp;
+      param pool_size = pool_size_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+  space S3B of TrainModelRNN_B {
+    strategy gridsearch;
+    param epochs_vp = enum(20);
+    param batch_size_vp = enum(32);
+    param hidden_units_1_vp = enum(64);
+    param hidden_units_2_vp = enum(64);
+    param activation_function_vp = enum("tanh");
+    task TrainModelBinary {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param hidden_units_1 = hidden_units_1_vp;
+      param hidden_units_2 = hidden_units_2_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+
+
+  // ************************************************************************************************
+  // * SPACES MULTICLASS
+  // ************************************************************************************************
+
+  space S1M of TrainModelNN_M {
+    strategy gridsearch;
+    //param epochs_vp = range(2, 4);
+    param epochs_vp = enum(100);
+    param batch_size_vp = enum(32);
+    param units_1_vp = enum(100);
+    param units_2_vp = enum(100);
+    param units_3_vp = enum(100);
+    param activation_function_vp = enum("relu");
+    task TrainModel {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param units_1 = units_1_vp;
+      param units_2 = units_2_vp;
+      param units_3 = units_3_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+  space S2M of TrainModelCNN_M {
+    strategy gridsearch;
+    param epochs_vp = enum(70);
+    param batch_size_vp = enum(32);
+    param filters_1_vp = enum(256);
+    param filters_2_vp = enum(256);
+    param kernel_size_vp = enum(3);
+    param pool_size_vp = enum(2);
+    param activation_function_vp = enum("relu");
+    task TrainModel {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param filters_1 = filters_1_vp;
+      param filters_2 = filters_2_vp;
+      param kernel_size = kernel_size_vp;
+      param pool_size = pool_size_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+  space S3M of TrainModelRNN_M {
+    strategy gridsearch;
+
+    param epochs_vp = enum(20);
+    param batch_size_vp = enum(32);
+    param hidden_units_1_vp = enum(64);
+    param hidden_units_2_vp = enum(64);
+    param activation_function_vp = enum("tanh");
+    task TrainModel {
+      param epochs = epochs_vp;
+      param batch_size = batch_size_vp;
+      param hidden_units_1 = hidden_units_1_vp;
+      param hidden_units_2 = hidden_units_2_vp;
+      param activation_function = activation_function_vp;
+    }
+  }
+
+  space V1 of MachineDataLoad {
+    strategy gridsearch;
+    param random = enum(1);
+    task MachineData {
+      param random = random;
+    }
+
+  }
+
+  task BestModelEvaluator {
+    implementation "UC5.T1_BestModelEvaluator";
+  }
+
+  task SelectBestModelAndPassMachineFiles {
+    implementation "UC5.T2_SelectBestModelAndPassMachineFiles";
+  }
+
+  task I1 {
+    implementation "UC5.I1_UserInteraction";
+  }
+}

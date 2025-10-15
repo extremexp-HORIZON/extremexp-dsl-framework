@@ -1,0 +1,189 @@
+// ************************************************************************************************
+// * PYTHIA MOBILITY SEGMENTATION PIPELINE
+// ************************************************************************************************
+
+workflow pythia_mobility_segmentation {
+    // Task definitions with implementations
+  task ValidateInput {
+    implementation "UC4/improved_mode_detection/ValidateInput/task.py";
+  }
+
+  task ProcessUserContext {
+    implementation "UC4/improved_mode_detection/ProcessUserContext/task.py";
+  }
+
+  task PreprocessData {
+    implementation "UC4/improved_mode_detection/PreprocessData/task.py";
+  }
+
+  task ApplyKalmanFilter {
+    implementation "UC4/improved_mode_detection/ApplyKalmanFilter/task.py";
+  }
+
+  task HybridSegmentation {
+    implementation "UC4/improved_mode_detection/HybridSegmentation/task.py";
+  }
+
+  task FixFalsePositives {
+    implementation "UC4/improved_mode_detection/FixFalsePositives/task.py";
+  }
+
+  task SyndetiresProcessing {
+    implementation "UC4/improved_mode_detection/SyndetiresProcessing/task.py";
+  }
+
+  task ModeDetection {
+    implementation "UC4/improved_mode_detection/ModeDetection/task.py";
+  }
+
+  task ColdStartFix {
+    implementation "UC4/improved_mode_detection/ColdStartFix/task.py";
+  }
+
+  task MergeMovingSegments {
+    implementation "UC4/improved_mode_detection/MergeMovingSegments/task.py";
+  }
+
+  task DeleteSmallRoundTrips {
+    implementation "UC4/improved_mode_detection/DeleteSmallRoundTrips/task.py";
+  }
+
+  task ApplyMobilityConstraints {
+    implementation "UC4/improved_mode_detection/ApplyMobilityConstraints/task.py";
+  }
+
+  task MergeMissingTripGaps {
+    implementation "UC4/improved_mode_detection/MergeMissingTripGaps/task.py";
+  }
+
+  task ApplyGeofences {
+    implementation "UC4/improved_mode_detection/ApplyGeofences/task.py";
+  }
+
+  task PlaceCorrection {
+    implementation "UC4/improved_mode_detection/PlaceCorrection/task.py";
+  }
+
+  task EnforceTimelineContinuity {
+    implementation "UC4/improved_mode_detection/EnforceTimelineContinuity/task.py";
+  }
+
+  task MergeStationarySegments {
+    implementation "UC4/improved_mode_detection/MergeStationarySegments/task.py";
+  }
+
+  task DetectMissingTrips {
+    implementation "UC4/improved_mode_detection/DetectMissingTrips/task.py";
+  }
+
+  task RemoveShortMoving {
+    implementation "UC4/improved_mode_detection/RemoveShortMoving/task.py";
+  }
+
+  task CalculateDistance {
+    implementation "UC4/improved_mode_detection/CalculateDistance/task.py";
+  }
+
+  task ResolveOverlaps {
+    implementation "UC4/improved_mode_detection/ResolveOverlaps/task.py";
+  }
+
+  task EnsureCompleteTimeline {
+    implementation "UC4/improved_mode_detection/EnsureCompleteTimeline/task.py";
+  }
+
+  task FormatOutput {
+    implementation "UC4/improved_mode_detection/FormatOutput/task.py";
+  }
+
+  // Task CONNECTIONS - Full Linear Pipeline
+  START -> ValidateInput -> ProcessUserContext -> PreprocessData -> ApplyKalmanFilter -> 
+           HybridSegmentation -> FixFalsePositives -> SyndetiresProcessing -> 
+           ModeDetection -> ColdStartFix -> MergeMovingSegments -> DeleteSmallRoundTrips -> 
+           ApplyMobilityConstraints -> MergeMissingTripGaps ->
+           ApplyGeofences -> PlaceCorrection -> EnforceTimelineContinuity ->
+           MergeStationarySegments -> DetectMissingTrips -> RemoveShortMoving -> 
+           CalculateDistance -> ResolveOverlaps -> EnsureCompleteTimeline -> 
+           FormatOutput -> END;
+
+  // *** INPUT/OUTPUT DATA DEFINITIONS ***
+  define input data LocationDataSingleDayUser;
+  LocationDataSingleDayUser --> ValidateInput.LocationDataSingleDayUser;
+  configure data LocationDataSingleDayUser {
+    path "UC4/RawTraces/Giannis/Giannis015.json";
+  }
+
+  define output data FinalSegments;
+  FormatOutput.FormattedSegments --> FinalSegments;
+  configure data FinalSegments {
+    path "UC4/PythiaOutputs/**";
+  }
+
+  // Data connections
+  ValidateInput.UserId --> ProcessUserContext.UserId;
+  ValidateInput.ValidatedLocations --> PreprocessData.Locations;
+  ValidateInput.ValidatedPlaces --> ProcessUserContext.Places;
+  ValidateInput.ValidatedGeofence --> ProcessUserContext.Geofence;
+  ValidateInput.ValidatedMobilities --> ProcessUserContext.UserMobilities;
+  ValidateInput.ValidatedPredictions --> ProcessUserContext.Predictions;
+  ValidateInput.ValidatedAccThreshold --> PreprocessData.AccuracyThreshold;
+  ValidateInput.ValidatedTimelineMode --> EnsureCompleteTimeline.TimelineMode;
+
+  // Data processing connections
+  PreprocessData.Preprocessed --> ApplyKalmanFilter.Preprocessed;
+  ApplyKalmanFilter.Filtered --> HybridSegmentation.Filtered;
+  HybridSegmentation.Segmented --> FixFalsePositives.Segmented;
+  FixFalsePositives.FixedSegmented --> SyndetiresProcessing.Segmented;
+
+  // Core segmentation result connections
+  SyndetiresProcessing.TripsDf --> ModeDetection.TripsDf;
+  SyndetiresProcessing.DicSegments --> ModeDetection.DicSegments;
+  SyndetiresProcessing.DfSyndetiresOutput --> ModeDetection.DfForMode;
+  
+  // User context connections for refinement
+  ProcessUserContext.MobilitiesList --> ModeDetection.Mobilities;
+  ProcessUserContext.GeofenceEvents --> ModeDetection.GeofenceEvents;
+  ProcessUserContext.MobilitiesList --> ApplyMobilityConstraints.Mobilities;
+  ProcessUserContext.ProcessedPlaces --> ApplyGeofences.Places;
+  ProcessUserContext.ProcessedPlaces --> PlaceCorrection.Places;
+  ProcessUserContext.ProcessedPlaces --> EnsureCompleteTimeline.Places;
+  ProcessUserContext.GeofenceEvents --> ApplyGeofences.GeofenceEvents;
+  ProcessUserContext.UserId --> FormatOutput.UserId;
+
+  // Refinement pipeline connections
+  ModeDetection.RefinedDicTrips --> ColdStartFix.DicTrips;
+  ColdStartFix.FixedDicTrips --> MergeMovingSegments.DicTrips;
+  MergeMovingSegments.MergedDicTrips --> DeleteSmallRoundTrips.DicTrips;
+  DeleteSmallRoundTrips.FilteredDicTrips --> ApplyMobilityConstraints.DicTrips;
+  ApplyMobilityConstraints.ConstrainedDicTrips --> MergeMissingTripGaps.DicTrips;
+  MergeMissingTripGaps.MergedDicTrips --> ApplyGeofences.DicTrips;
+  ApplyGeofences.GeofencedDicTrips --> PlaceCorrection.DicTrips;
+  PlaceCorrection.CorrectedDicTrips --> EnforceTimelineContinuity.DicTrips;
+  EnforceTimelineContinuity.ContinuousDicTrips --> MergeStationarySegments.DicTrips;
+  MergeStationarySegments.MergedDicTrips --> DetectMissingTrips.DicTrips;
+  DetectMissingTrips.CompletedDicTrips --> RemoveShortMoving.DicTrips;
+  RemoveShortMoving.CleanedDicTrips --> CalculateDistance.DicTrips;
+  CalculateDistance.DistanceCalculatedDicTrips --> ResolveOverlaps.DicTrips;
+  ResolveOverlaps.OverlapResolvedDicTrips --> EnsureCompleteTimeline.DicTrips;
+  EnsureCompleteTimeline.CompletedDicTrips --> FormatOutput.CompletedDicTrips;
+}
+
+// ************************************************************************************************
+// * WORKFLOW VARIANTS
+// ************************************************************************************************
+workflow pythia_mobility_segmentation_simple from pythia_mobility_segmentation {
+}
+
+// ************************************************************************************************
+// * EXPERIMENT
+// ************************************************************************************************
+
+experiment PythiaSimple {
+  control {
+    START -> S1 -> END;
+  }
+  space S1 of pythia_mobility_segmentation_simple {
+    strategy randomsearch;
+    runs = 1;
+  }
+}

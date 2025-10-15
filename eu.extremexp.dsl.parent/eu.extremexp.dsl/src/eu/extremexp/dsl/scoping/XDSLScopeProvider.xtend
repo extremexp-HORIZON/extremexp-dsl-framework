@@ -12,12 +12,11 @@ import eu.extremexp.dsl.xDSL.CompositeWorkflow
 import eu.extremexp.dsl.xDSL.AssembledWorkflow
 import org.eclipse.xtext.scoping.Scopes
 import eu.extremexp.dsl.xDSL.Space
-import org.eclipse.emf.ecore.resource.Resource
 import eu.extremexp.dsl.xDSL.Experiment
 import eu.extremexp.dsl.xDSL.Reference
 import org.eclipse.emf.common.util.URI
-import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.core.resources.IProject
+import org.eclipse.core.runtime.Path
 
 /**
  * This class contains custom scoping description.
@@ -92,20 +91,35 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 						workflows += t
 					]
 					
+					
 					// then add ref workflows
 					for (refObj : experiment.refs){
 						val path = (refObj as Reference).ref
 						if (path !== null && !path.trim.empty){
 							val baseURI = experiment.eResource.URI
+							var fileURI = URI.createFileURI(path)
 							if (baseURI.platform){
 								val projectName = baseURI.segment(1)
-								val fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
-								var resource = experiment.eResource.resourceSet.getResource(fileURI, true)
+								fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
+								
+							}
+							else{
+								val workspacePath = System.getenv("SHARED_WORKSPACE_PATH")
+								fileURI = URI.createFileURI(workspacePath + "/" + path)
+								
+							}
+					
+							try{
+								
+								val resource = experiment.eResource.resourceSet.getResource(fileURI, true)
+								if (!resource.isLoaded)
+									resource.load(null)
 								resource.allContents.filter[t | t instanceof Workflow].forEach[t | 
 									workflows += t
 								]
+							
 							}
-							else {
+							catch (Exception ex){
 								
 							}
 						}

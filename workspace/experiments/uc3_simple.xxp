@@ -1,0 +1,78 @@
+workflow FireDetectionWorkflow {
+
+    task DetectAlert {
+        implementation "DetectAlert";
+    }
+
+    task SelectUsers {
+        implementation "SelectUsers";
+    }
+
+    task UserResponse {
+        implementation "UserResponse";
+    }
+
+     START -> DetectAlert -> SelectUsers -> UserResponse -> END;
+
+
+    define input data ModelFile;
+
+    configure data ModelFile {
+        path "DetectAlert/**";
+    }
+
+    ModelFile --> DetectAlert.ModelFile;
+}
+
+workflow FireDetectionWorkflow1 from FireDetectionWorkflow {
+
+}
+
+experiment Exp1 {
+    intent testComplexControl;
+
+    control {
+        START -> S1 -> END;
+    }
+
+    space S1 of FireDetectionWorkflow1 {
+        strategy gridsearch;
+        //strategy randomsearch;
+        runs = 1;
+        
+        // SelectUsers
+        param num_users_selection_values = range(1,5);
+        param selection_diameter_km_values = range(1,20);
+        param osrm_profile_values = enum("driving","walking","cycling");
+        param filter_only_available_values = enum("true","false");
+        param sort_by_values = enum("distance","travel_time");
+        param osrm_timeout_s_values = range(1,10);
+        param euclidian_filter_km_values = range(1,50);
+
+        // UserResponse
+        param accept_string_values       = enum("accept","yes","ok");
+        param reject_string_values       = enum("reject","no","cancel");
+        param case_sensitive_values      = enum("true","false");
+        param default_response_values    = enum("accept","reject","none");
+        param result_key_values          = enum("alert_accepted");
+        
+        task SelectUsers {
+            param num_users_selection      = num_users_selection_values;
+            param selection_diameter_km    = selection_diameter_km_values;
+            param osrm_profile             = osrm_profile_values;
+            param filter_only_available    = filter_only_available_values;
+            param sort_by                  = sort_by_values;
+            param osrm_timeout_s           = osrm_timeout_s_values;
+            param euclidian_filter_km      = euclidian_filter_km_values;
+        }
+
+        task UserResponse {
+            param accept_string    = accept_string_values;
+            param reject_string    = reject_string_values;
+            param case_sensitive   = case_sensitive_values;
+            param default_response = default_response_values;
+            param result_key       = result_key_values;
+        }
+
+    }
+}

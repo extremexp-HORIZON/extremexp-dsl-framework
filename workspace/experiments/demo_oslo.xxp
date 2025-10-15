@@ -1,0 +1,37 @@
+workflow SingleTaskW {
+
+    task Task1 {
+        implementation "demo_tasks/TestOutput";
+    }
+
+    START -> Task1 -> END;
+
+    define input data InputFile;
+    InputFile --> Task1.InputFile;
+    configure data InputFile {
+        path "demo_datasets/demo_data.txt";
+    }
+
+    define output data OutputFile;
+    Task1.OutputFile --> OutputFile;
+    configure data OutputFile {
+     path "output/trained_model/**";
+    }
+
+}
+
+workflow SingleTaskAW2 from SingleTaskW {
+}
+
+experiment TestKostasExp {
+	
+    control {
+          START -> S1 -> END;
+    }
+
+    space S1 of SingleTaskAW2 {
+        strategy randomsearch;
+        runs = 1;
+    }
+
+}

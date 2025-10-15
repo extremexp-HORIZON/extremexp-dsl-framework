@@ -1,0 +1,74 @@
+package CS_surrogate_model_DEMO;
+
+workflow CS_surrogate_model_DEMO {
+
+    // Task CONNECTIONS
+    START -> TrainModelAPI -> ReadMetrics -> END;
+
+    task TrainModelAPI;
+
+    task ReadMetrics {
+        implementation "UC1.surrogate_model.ReadMetricsAPI";
+    }
+
+    // DATA
+    define input data ExternalDataFile;
+
+    configure data ExternalDataFile {
+        path "UC1/**";
+    }
+
+    // DATA CONNECTIONS
+    ExternalDataFile --> TrainModelAPI.FileToRead;
+    TrainModelAPI.jobID --> ReadMetrics.jobID;
+    TrainModelAPI.DataVolumeRatio --> ReadMetrics.DataVolumeRatio;
+}
+
+workflow TrainDemoAPI from CS_surrogate_model_DEMO {
+  task DemoAPI {
+    implementation "UC1.surrogate_model.TrainModelAPI";
+  }
+}
+
+experiment EXP {
+    intent FindBestClassifier;
+    control {
+        START -> S1 -> S2 -> END;
+    }
+
+    space S1 of TrainDemoAPI {
+        strategy gridsearch;
+        param batch_size_vp = enum(1);
+        param lr_vp = enum(0.01);
+        param optimizer_vp = enum("Adam");
+        param scheduler_vp = enum("reduce_plateau");
+        param patch_size_vp = enum(256);
+        param model_config_vp = enum(0);
+        task DemoAPI {
+            param batch_size = batch_size_vp;
+            param lr = lr_vp;
+            param optimizer = optimizer_vp;
+            param scheduler = scheduler_vp;
+            param patch_size = patch_size_vp;
+            param model_config = model_config_vp;
+        }
+    }
+
+    space S2 of TrainDemoAPI {
+        strategy gridsearch;
+        param batch_size_vp = enum(1);
+        param lr_vp = enum(0.01);
+        param optimizer_vp = enum("Adam");
+        param scheduler_vp = enum("reduce_plateau");
+        param patch_size_vp = enum(512);
+        param model_config_vp = enum(1);
+        task DemoAPI {
+            param batch_size = batch_size_vp;
+            param lr = lr_vp;
+            param optimizer = optimizer_vp;
+            param scheduler = scheduler_vp;
+            param patch_size = patch_size_vp;
+            param model_config = model_config_vp;
+        }
+    }
+}

@@ -8,6 +8,14 @@
 	</parent>
 	<artifactId>eu.extremexp.dsl</artifactId>
 	<packaging>eclipse-plugin</packaging>
+	
+	<dependencies>
+			<dependency>
+		    <groupId>org.eclipse.core</groupId>
+		    <artifactId>org.eclipse.core.resources</artifactId>
+		    <version>3.7.100</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>

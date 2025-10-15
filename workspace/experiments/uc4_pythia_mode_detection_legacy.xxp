@@ -1,0 +1,887 @@
+// ************************************************************************************************
+// * PYTHIA MOBILITY SEGMENTATION PIPELINE WITHOUT EXTERNAL TOOLS
+// ************************************************************************************************
+
+workflow pythia_mobility_segmentation {
+
+  // Task CONNECTIONS - Full Linear Pipeline
+  START -> ValidateInput -> ProcessUserContext -> PreprocessData -> ApplyKalmanFilter -> HybridSegmentation -> FixFalsePositives -> SyndetiresProcessing ->  ModeDetection -> ColdStartFix -> MergeMovingSegments -> DeleteSmallRoundTrips ->  ApplyMobilityConstraints -> MergeMissingTripGaps ->  ApplyGeofences -> PlaceCorrection -> EnforceTimelineContinuity ->   MergeStationarySegments -> DetectMissingTrips -> RemoveShortMoving ->  CalculateDistance -> ResolveOverlaps -> EnsureCompleteTimeline ->  FormatOutput -> END;
+
+  // *** SEGMENT DATA PIPELINE TASKS ***
+  
+  task ValidateInput {
+    implementation "UC4/improved_mode_detection/ValidateInput/task.py";
+    dependency "moby_src/core";
+  }
+
+  task ProcessUserContext {
+    implementation "UC4/improved_mode_detection/ProcessUserContext/task.py";
+    dependency "moby_src/core";
+  }
+
+  task PreprocessData {
+    implementation "UC4/improved_mode_detection/PreprocessData/task.py";
+    dependency "moby_src/core";
+  }
+
+  task ApplyKalmanFilter {
+    implementation "UC4/improved_mode_detection/ApplyKalmanFilter/task.py";
+    dependency "moby_src/core";
+    param process_noise_scale = 0.01;
+    param measurement_noise_scale = 1.0;
+  }
+
+  task HybridSegmentation {
+    implementation "UC4/improved_mode_detection/HybridSegmentation/task.py";
+    dependency "moby_src/core";
+    param speed_threshold = 1.0;
+  }
+
+  task FixFalsePositives {
+    implementation "UC4/improved_mode_detection/FixFalsePositives/task.py";
+    dependency "moby_src/core";
+  }
+
+  task SyndetiresProcessing {
+    implementation "UC4/improved_mode_detection/SyndetiresProcessing/task.py";
+    dependency "moby_src/core";
+  }
+
+  // *** REFINEMENT PIPELINE TASKS ***
+  
+  task ModeDetection {
+    implementation "UC4/improved_mode_detection/ModeDetectionLegacy/task.py";       // USING THE LEGACY ALGORITHM ! ! ! ! ! - Variability Point (mode detection)
+    dependency "moby_src/core";
+  }
+
+  task ColdStartFix {
+    implementation "UC4/improved_mode_detection/ColdStartFix/task.py";
+    dependency "moby_src/core";
+  }
+
+  task MergeMovingSegments {
+    implementation "UC4/improved_mode_detection/MergeMovingSegments/task.py";
+    dependency "moby_src/core";
+    param max_iterations = 5;
+  }
+
+  task DeleteSmallRoundTrips {
+    implementation "UC4/improved_mode_detection/DeleteSmallRoundTrips/task.py";
+    dependency "moby_src/core";
+    param max_duration_minutes = 10;
+    param max_distance_meters = 100;
+  }
+
+  task ApplyMobilityConstraints {
+    implementation "UC4/improved_mode_detection/ApplyMobilityConstraints/task.py";
+    dependency "moby_src/core";
+  }
+
+  task MergeMissingTripGaps {
+    implementation "UC4/improved_mode_detection/MergeMissingTripGaps/task.py";
+    dependency "moby_src/core";
+  }
+
+  task ApplyGeofences {
+    implementation "UC4/improved_mode_detection/ApplyGeofences/task.py";
+    dependency "moby_src/core";
+  }
+
+  task PlaceCorrection {
+    implementation "UC4/improved_mode_detection/PlaceCorrection/task.py";
+    dependency "moby_src/core";
+  }
+
+  task EnforceTimelineContinuity {
+    implementation "UC4/improved_mode_detection/EnforceTimelineContinuity/task.py";
+    dependency "moby_src/core";
+    param place_distance_threshold = 50;
+  }
+
+  task MergeStationarySegments {
+    implementation "UC4/improved_mode_detection/MergeStationarySegments/task.py";
+    dependency "moby_src/core";
+    param max_gap_seconds = 300;
+    param allow_small_overlap = true;
+    param max_overlap_seconds = 5;
+    param ignore_short_moving = true;
+    param short_moving_threshold = 60;
+    param max_distance_threshold = 50;
+  }
+
+  task DetectMissingTrips {
+    implementation "UC4/improved_mode_detection/DetectMissingTrips/task.py";
+    dependency "moby_src/core";
+    param max_gap_seconds = 4500;
+    param min_distance_threshold = 100;
+  }
+
+  task RemoveShortMoving {
+    implementation "UC4/improved_mode_detection/RemoveShortMoving/task.py";
+    dependency "moby_src/core";
+    param min_duration_seconds = 60;
+    param max_distance_meters = 50;
+  }
+
+  task CalculateDistance {
+    implementation "UC4/improved_mode_detection/CalculateDistance/task.py";
+    dependency "moby_src/core";
+  }
+
+  task ResolveOverlaps {
+    implementation "UC4/improved_mode_detection/ResolveOverlaps/task.py";
+    dependency "moby_src/core";
+  }
+
+  task EnsureCompleteTimeline {
+    implementation "UC4/improved_mode_detection/EnsureCompleteTimeline/task.py";
+    dependency "moby_src/core";
+    param min_gap_seconds = 0.001;
+  }
+
+  task FormatOutput {
+    implementation "UC4/improved_mode_detection/FormatOutput/task.py";
+    dependency "moby_src/core";
+  }
+
+  // *** INPUT DATA ***
+  define input data LocationsData;
+  define input data PlacesData;
+  define input data GeofenceData;
+  define input data MobilitiesData;
+  define input data PredictionsData;
+  define input data AccuracyThreshold;
+  define input data TimelineMode;
+
+  // *** OUTPUT DATA ***
+  define output data FinalSegments;
+
+  // *** DATA CONNECTIONS ***
+  
+  // Initial input connections
+  LocationsData --> ValidateInput.Locations;
+  PlacesData --> ValidateInput.Places;
+  GeofenceData --> ValidateInput.Geofence;
+  MobilitiesData --> ValidateInput.UserMobilities;
+  PredictionsData --> ValidateInput.Predictions;
+  AccuracyThreshold --> ValidateInput.AccThreshold;
+  TimelineMode --> ValidateInput.TimelineMode;
+
+  // User context and validation
+  ValidateInput.UserId --> ProcessUserContext.UserId;
+  ValidateInput.ValidatedLocations --> PreprocessData.Locations;
+  ValidateInput.ValidatedPlaces --> ProcessUserContext.Places;
+  ValidateInput.ValidatedGeofence --> ProcessUserContext.Geofence;
+  ValidateInput.ValidatedMobilities --> ProcessUserContext.UserMobilities;
+  ValidateInput.ValidatedPredictions --> ProcessUserContext.Predictions;
+  ValidateInput.ValidatedAccThreshold --> PreprocessData.AccuracyThreshold;
+  ValidateInput.ValidatedTimelineMode --> EnsureCompleteTimeline.TimelineMode;
+
+  // Initial data processing
+  PreprocessData.Preprocessed --> ApplyKalmanFilter.Preprocessed;
+  ApplyKalmanFilter.Filtered --> HybridSegmentation.Filtered;
+  HybridSegmentation.Segmented --> FixFalsePositives.Segmented;
+  FixFalsePositives.FixedSegmented --> SyndetiresProcessing.Segmented;
+
+  // Core segmentation results
+  SyndetiresProcessing.TripsDf --> ModeDetection.TripsDf;
+  SyndetiresProcessing.DicSegments --> ModeDetection.DicSegments;
+  SyndetiresProcessing.DfSyndetiresOutput --> ModeDetection.DfForMode;
+  
+  // User context data for refinement
+  ProcessUserContext.MobilitiesList --> ModeDetection.Mobilities;
+  ProcessUserContext.GeofenceEvents --> ModeDetection.GeofenceEvents;
+  ProcessUserContext.MobilitiesList --> ApplyMobilityConstraints.Mobilities;
+  ProcessUserContext.ProcessedPlaces --> ApplyGeofences.Places;
+  ProcessUserContext.ProcessedPlaces --> PlaceCorrection.Places;
+  ProcessUserContext.ProcessedPlaces --> EnsureCompleteTimeline.Places;
+  ProcessUserContext.GeofenceEvents --> ApplyGeofences.GeofenceEvents;
+  ProcessUserContext.UserId --> FormatOutput.UserId;
+
+  // Refinement pipeline connections (modified to remove external tools)
+  ModeDetection.RefinedDicTrips --> ColdStartFix.DicTrips;
+  ColdStartFix.FixedDicTrips --> MergeMovingSegments.DicTrips;
+  MergeMovingSegments.MergedDicTrips --> DeleteSmallRoundTrips.DicTrips;
+  DeleteSmallRoundTrips.FilteredDicTrips --> ApplyMobilityConstraints.DicTrips;
+  ApplyMobilityConstraints.ConstrainedDicTrips --> MergeMissingTripGaps.DicTrips;
+  MergeMissingTripGaps.MergedDicTrips --> ApplyGeofences.DicTrips;
+  ApplyGeofences.GeofencedDicTrips --> PlaceCorrection.DicTrips;
+  PlaceCorrection.CorrectedDicTrips --> EnforceTimelineContinuity.DicTrips;
+  EnforceTimelineContinuity.ContinuousDicTrips --> MergeStationarySegments.DicTrips;
+  MergeStationarySegments.MergedDicTrips --> DetectMissingTrips.DicTrips;
+  DetectMissingTrips.CompletedDicTrips --> RemoveShortMoving.DicTrips;
+  RemoveShortMoving.CleanedDicTrips --> CalculateDistance.DicTrips;
+  CalculateDistance.DistanceCalculatedDicTrips --> ResolveOverlaps.DicTrips;
+  ResolveOverlaps.OverlapResolvedDicTrips --> EnsureCompleteTimeline.DicTrips;
+  EnsureCompleteTimeline.CompletedDicTrips --> FormatOutput.CompletedDicTrips;
+
+  // Final output
+  FormatOutput.FormattedSegments --> FinalSegments;
+
+  // Configure default values
+  configure data AccuracyThreshold {
+    default 50;
+  }
+
+  configure data TimelineMode {
+    default "open";
+  }
+}
+
+// ************************************************************************************************
+// * CONFIGURATION PARAMETERS
+// ************************************************************************************************
+
+configure pythia_mobility_segmentation {
+  param DEFAULT_ACCURACY_THRESHOLD = 50;
+  param DEFAULT_TIMELINE_MODE = "open";
+  param MAX_SEGMENT_MERGES = 5;
+  param KALMAN_PROCESS_NOISE = 0.01;
+  param KALMAN_MEASUREMENT_NOISE = 1.0;
+  param MIN_WALKING_ROUNDTRIP_DURATION = 10;
+  param MAX_WALKING_ROUNDTRIP_DISTANCE = 100;
+  param MAX_GAP_SECONDS = 300;
+  param MIN_DISTANCE_THRESHOLD = 100;
+  param SHORT_MOVING_THRESHOLD = 60;
+  param PLACE_DISTANCE_THRESHOLD = 50;
+}
+
+// ************************************************************************************************
+// * TASK DEFINITIONS
+// ************************************************************************************************
+
+// ValidateInput Task
+task ValidateInput {
+    define input data Locations;
+    define input data Places;
+    define input data Geofence;
+    define input data UserMobilities;
+    define input data Predictions;
+    define input data AccThreshold;
+    define input data TimelineMode;
+    
+    define output data UserId;
+    define output data ValidatedLocations;
+    define output data ValidatedPlaces;
+    define output data ValidatedGeofence;
+    define output data ValidatedMobilities;
+    define output data ValidatedPredictions;
+    define output data ValidatedAccThreshold;
+    define output data ValidatedTimelineMode;
+    
+    define param min_records {
+        type Integer;
+        default 5;
+        range (1, 100);
+    }
+    
+    define param max_acc_threshold {
+        type Integer;
+        default 100;
+        range (10, 500);
+    }
+}
+
+// ProcessUserContext Task
+task ProcessUserContext {
+    define input data UserId;
+    define input data Places;
+    define input data Geofence;
+    define input data UserMobilities;
+    define input data Predictions;
+    
+    define output data MobilitiesList;
+    define output data GeofenceEvents;
+    define output data RecentPrediction;
+    define output data ProcessedPlaces;
+    define output data UserId;
+    
+    define param default_place_radius {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param max_predictions_age_days {
+        type Integer;
+        default 7;
+        range (1, 30);
+    }
+}
+
+// PreprocessData Task
+task PreprocessData {
+    define input data Locations;
+    define input data AccuracyThreshold;
+    
+    define output data Preprocessed;
+    
+    define param remove_duplicate_timestamps {
+        type Boolean;
+        default true;
+    }
+    
+    define param min_speed_threshold_kmh {
+        type Float;
+        default 300.0;
+        range (100.0, 1000.0);
+    }
+    
+    define param min_acc_for_activity {
+        type Integer;
+        default 30;
+        range (0, 100);
+    }
+}
+
+// ApplyKalmanFilter Task
+task ApplyKalmanFilter {
+    define input data Preprocessed;
+    
+    define output data Filtered;
+    
+    define param process_noise_scale {
+        type Float;
+        default 0.01;
+        range (0.001, 0.1);
+    }
+    
+    define param measurement_noise_scale {
+        type Float;
+        default 1.0;
+        range (0.1, 10.0);
+    }
+    
+    define param skip_if_empty {
+        type Boolean;
+        default true;
+    }
+}
+
+// HybridSegmentation Task
+task HybridSegmentation {
+    define input data Filtered;
+    define output data Segmented;
+    
+    define param speed_threshold {
+        type Float;
+        default 1.0;
+        range (0.5, 3.0);
+    }
+    
+    define param min_stationary_points {
+        type Integer;
+        default 3;
+        range (2, 10);
+    }
+    
+    define param max_acceleration {
+        type Float;
+        default 2.5;
+        range (1.0, 5.0);
+    }
+    
+    define param use_kalman_velocities {
+        type Boolean;
+        default true;
+    }
+}
+
+// FixFalsePositives Task
+task FixFalsePositives {
+    define input data Segmented;
+    define output data FixedSegmented;
+    
+    define param min_moving_distance {
+        type Float;
+        default 0.05;
+        range (0.01, 0.5);
+    }
+    
+    define param min_moving_speed {
+        type Float;
+        default 1.0;
+        range (0.5, 5.0);
+    }
+    
+    define param min_moving_points {
+        type Integer;
+        default 5;
+        range (3, 20);
+    }
+}
+
+// SyndetiresProcessing Task
+task SyndetiresProcessing {
+    define input data FixedSegmented;
+    
+    define output data TripsDf;
+    define output data DicSegments;
+    define output data DfSyndetiresOutput;
+    
+    define param min_segment_duration_seconds {
+        type Integer;
+        default 30;
+        range (10, 300);
+    }
+    
+    define param max_stationary_radius_meters {
+        type Integer;
+        default 100;
+        range (20, 500);
+    }
+    
+    define param enable_wandering_detection {
+        type Boolean;
+        default true;
+    }
+}
+
+// ModeDetection Task
+task ModeDetection {
+    define input data TripsDf;
+    define input data DicSegments;
+    define input data DfForMode;
+    define input data Mobilities;
+    define input data GeofenceEvents;
+    
+    define output data RefinedDicTrips;
+    
+    define param use_enhanced_detection {
+        type Boolean;
+        default true;
+    }
+    
+    define param fallback_to_standard {
+        type Boolean;
+        default true;
+    }
+    
+    define param confidence_threshold {
+        type Float;
+        default 0.6;
+        range (0.3, 0.9);
+    }
+    
+    define param min_points_for_mode {
+        type Integer;
+        default 5;
+        range (3, 10);
+    }
+}
+
+// ColdStartFix Task
+task ColdStartFix {
+    define input data RefinedDicTrips;
+    define output data FixedDicTrips;
+    
+    define param max_fix_duration_minutes {
+        type Integer;
+        default 30;
+        range (5, 120);
+    }
+    
+    define param apply_time_corrections {
+        type Boolean;
+        default true;
+    }
+    
+    define param force_utc_timestamps {
+        type Boolean;
+        default true;
+    }
+}
+
+// MergeMovingSegments Task
+task MergeMovingSegments {
+    define input data FixedDicTrips;
+    define output data MergedDicTrips;
+    
+    define param max_iterations {
+        type Integer;
+        default 5;
+        range (1, 20);
+    }
+    
+    define param max_gap_seconds {
+        type Integer;
+        default 120;
+        range (30, 600);
+    }
+    
+    define param require_same_mode {
+        type Boolean;
+        default true;
+    }
+}
+
+// DeleteSmallRoundTrips Task
+task DeleteSmallRoundTrips {
+    define input data MergedDicTrips;
+    define output data FilteredDicTrips;
+    
+    define param max_duration_minutes {
+        type Integer;
+        default 10;
+        range (5, 30);
+    }
+    
+    define param max_distance_meters {
+        type Integer;
+        default 100;
+        range (50, 500);
+    }
+    
+    define param walking_mode_only {
+        type Boolean;
+        default true;
+    }
+    
+    define param convert_to_stationary {
+        type Boolean;
+        default false;
+    }
+}
+
+// ApplyMobilityConstraints Task
+task ApplyMobilityConstraints {
+    define input data FilteredDicTrips;
+    define input data Mobilities;
+    
+    define output data ConstrainedDicTrips;
+    
+    define param apply_strict_constraints {
+        type Boolean;
+        default false;
+    }
+    
+    define param handle_unknown_modes {
+        type Boolean;
+        default true;
+    }
+    
+    define param unknown_to_walking_threshold_kmh {
+        type Float;
+        default 5.0;
+        range (2.0, 10.0);
+    }
+}
+
+// MergeMissingTripGaps Task
+task MergeMissingTripGaps {
+    define input data ConstrainedDicTrips;
+    define output data MergedDicTrips;
+    
+    define param max_gap_seconds {
+        type Integer;
+        default 300;
+        range (60, 900);
+    }
+    
+    define param min_distance_threshold {
+        type Float;
+        default 100.0;
+        range (50.0, 500.0);
+    }
+    
+    define param require_same_mode {
+        type Boolean;
+        default false;
+    }
+}
+
+// ApplyGeofences Task
+task ApplyGeofences {
+    define input data MergedDicTrips;
+    define input data Places;
+    define input data GeofenceEvents;
+    
+    define output data GeofencedDicTrips;
+    
+    define param max_distance_meters {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param override_activities {
+        type Boolean;
+        default true;
+    }
+    
+    define param apply_to_stationary_only {
+        type Boolean;
+        default true;
+    }
+}
+
+// PlaceCorrection Task
+task PlaceCorrection {
+    define input data GeofencedDicTrips;
+    define input data Places;
+    
+    define output data CorrectedDicTrips;
+    
+    define param proximity_threshold_meters {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param apply_to_stationary_only {
+        type Boolean;
+        default true;
+    }
+    
+    define param override_existing_places {
+        type Boolean;
+        default false;
+    }
+}
+
+// EnforceTimelineContinuity Task
+task EnforceTimelineContinuity {
+    define input data CorrectedDicTrips;
+    define output data ContinuousDicTrips;
+    
+    define param place_distance_threshold {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param max_stationary_gap_seconds {
+        type Integer;
+        default 300;
+        range (60, 900);
+    }
+    
+    define param fix_overlapping_segments {
+        type Boolean;
+        default true;
+    }
+}
+
+// MergeStationarySegments Task
+task MergeStationarySegments {
+    define input data ContinuousDicTrips;
+    define output data MergedDicTrips;
+    
+    define param max_gap_seconds {
+        type Integer;
+        default 300;
+        range (60, 900);
+    }
+    
+    define param allow_small_overlap {
+        type Boolean;
+        default true;
+    }
+    
+    define param max_overlap_seconds {
+        type Integer;
+        default 5;
+        range (1, 30);
+    }
+    
+    define param ignore_short_moving {
+        type Boolean;
+        default true;
+    }
+    
+    define param short_moving_threshold {
+        type Integer;
+        default 60;
+        range (30, 300);
+    }
+    
+    define param max_distance_threshold {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+}
+
+// DetectMissingTrips Task
+task DetectMissingTrips {
+    define input data MergedDicTrips;
+    define output data CompletedDicTrips;
+    
+    define param max_gap_seconds {
+        type Integer;
+        default 4500;
+        range (300, 10800);
+    }
+    
+    define param min_distance_threshold {
+        type Float;
+        default 100.0;
+        range (50.0, 500.0);
+    }
+    
+    define param unknown_mode {
+        type String;
+        default "unknown";
+    }
+    
+    define param add_missing_trip {
+        type Boolean;
+        default true;
+    }
+}
+
+// RemoveShortMoving Task
+task RemoveShortMoving {
+    define input data CompletedDicTrips;
+    define output data CleanedDicTrips;
+    
+    define param min_duration_seconds {
+        type Integer;
+        default 60;
+        range (30, 300);
+    }
+    
+    define param max_distance_meters {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param convert_to_stationary {
+        type Boolean;
+        default false;
+    }
+    
+    define param check_place_identity {
+        type Boolean;
+        default true;
+    }
+}
+
+// CalculateDistance Task
+task CalculateDistance {
+    define input data CleanedDicTrips;
+    define output data DistanceCalculatedDicTrips;
+    
+    define param use_geodesic_calculation {
+        type Boolean;
+        default true;
+    }
+    
+    define param interpolate_missing_locations {
+        type Boolean;
+        default false;
+    }
+    
+    define param max_locations_per_segment {
+        type Integer;
+        default 1000;
+        range (100, 10000);
+    }
+}
+
+// ResolveOverlaps Task
+task ResolveOverlaps {
+    define input data DistanceCalculatedDicTrips;
+    define output data OverlapResolvedDicTrips;
+    
+    define param max_overlap_seconds {
+        type Integer;
+        default 30;
+        range (1, 300);
+    }
+    
+    define param prioritize_moving {
+        type Boolean;
+        default true;
+    }
+    
+    define param allow_zero_duration {
+        type Boolean;
+        default false;
+    }
+}
+
+// EnsureCompleteTimeline Task
+task EnsureCompleteTimeline {
+    define input data OverlapResolvedDicTrips;
+    define input data Places;
+    define input data TimelineMode;
+    
+    define output data CompletedDicTrips;
+    
+    define param proximity_threshold {
+        type Integer;
+        default 50;
+        range (10, 200);
+    }
+    
+    define param min_gap_seconds {
+        type Float;
+        default 0.001;
+        range (0.001, 1.0);
+    }
+    
+    define param max_gap_hours {
+        type Integer;
+        default 6;
+        range (1, 24);
+    }
+}
+
+// FormatOutput Task
+task FormatOutput {
+    define input data CompletedDicTrips;
+    define input data UserId;
+    
+    define output data FormattedSegments;
+    
+    define param use_iso_format {
+        type Boolean;
+        default true;
+    }
+    
+    define param reindex_segments {
+        type Boolean;
+        default true;
+    }
+    
+    define param sort_chronologically {
+        type Boolean;
+        default true;
+    }
+}
+
+// ************************************************************************************************
+// * EXPERIMENTAL SPACES
+// ************************************************************************************************
+
+experiment PythiaOptimization {
+  intent OptimizeSegmentation;
+  control {
+    START -> OptimizeParams -> END;
+  }
+  
+  space OptimizeParams of pythia_mobility_segmentation {
+    strategy gridsearch;
+    param kalman_noise_vp = enum(0.01, 0.05, 0.1);
+    param accuracy_threshold_vp = enum(30, 50, 70);
+    param place_distance_vp = enum(30, 50, 70);
+    
+    task ApplyKalmanFilter {
+      param process_noise_scale = kalman_noise_vp;
+    }
+    
+    task ValidateInput {
+      param AccThreshold = accuracy_threshold_vp;
+    }
+    
+    task EnforceTimelineContinuity {
+      param place_distance_threshold = place_distance_vp;
+    }
+    
+    task MergeStationarySegments {
+      param max_distance_threshold = place_distance_vp;
+    }
+  }
+}

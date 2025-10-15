@@ -1,0 +1,49 @@
+workflow uc2_workflow1 {
+
+    START -> ReadData -> Partitioning -> ModelTrain -> ModelPredict -> END;
+
+    task ReadData {
+        implementation "I2CAT.read_data";
+    }
+
+    task Partitioning {
+        implementation "I2CAT.split_dataset";
+    }
+
+    task ModelTrain;
+
+    task ModelPredict {
+        implementation "I2CAT.benchmark_model";
+    }
+
+    define input data ExternalDataFile;
+    ExternalDataFile --> ReadData.FileToRead;
+
+    configure data ExternalDataFile {
+        path "uc2-datasets/dataset_RiskBehaviour/RiskActivities/Crypto_desktop.parquet";
+    }
+}
+
+workflow Assembled_uc2_workflow1 from uc2_workflow1 {
+    task ModelTrain {
+        implementation "I2CAT.train_model";
+    }
+}
+
+experiment uc2_workflow1_Exp {
+    intent FindBestClassifier;
+    control {
+        START -> s1 -> END;
+    }
+
+    space s1 of Assembled_uc2_workflow1 {
+        strategy gridsearch;
+        param max_depth_vp = range(3, 4);
+        param n_estimators_vp = range(5, 6);
+
+        task ModelTrain {
+          param max_depth = max_depth_vp;
+          param n_estimators = n_estimators_vp;
+        }
+    }
+}

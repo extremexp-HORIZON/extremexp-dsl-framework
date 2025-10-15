@@ -1,0 +1,76 @@
+package CS_building_segmentation;
+
+workflow CS_building_segmentation_main {
+
+    // Task CONNECTIONS
+    START -> ReadData -> BuildingSegmentation -> EvaluateModel -> END;
+
+    task ReadData {
+        implementation "UC1.building_seg.ReadData";
+    }
+
+    task BuildingSegmentation;
+
+    task EvaluateModel {
+        implementation "UC1.building_seg.EvaluateModel";
+    }
+
+    // DATA
+    define input data ExternalDataFolder;
+
+    // DATA CONNECTIONS
+    ExternalDataFolder --> ReadData.FolderToRead;
+
+    configure data ExternalDataFolder {
+        path "UC1/**";
+    }
+
+    define output data TrainedModelFolder;
+
+    ReadData.POINTS --> BuildingSegmentation.POINTS;
+    BuildingSegmentation.POLYGONS --> EvaluateModel.POLYGONS;
+}
+
+workflow BuildingSegmentation_Alpha from CS_building_segmentation_main {
+  task BuildingSegmentation {
+    implementation "UC1.building_seg.BuildingSeg_Alpha";
+  }
+}
+
+workflow BuildingSegmentation_DBSCAN from CS_building_segmentation_main {
+  task BuildingSegmentation {
+    implementation "UC1.building_seg.BuildingSeg_DBSCAN";
+  }
+}
+
+experiment EXP {
+    intent FindBestClassifier;
+    control {
+        START -> S1 -> S2 -> END;
+    }
+
+    space S1 of BuildingSegmentation_Alpha {
+        strategy gridsearch;
+        param m2_thresh_vp = enum(5);
+        param rdp_epsilon_vp = enum(1.2);
+        param epsilon_vp = enum(200);
+        task BuildingSegmentation {
+            param m2_thresh = m2_thresh_vp;
+            param rdp_epsilon = rdp_epsilon_vp;
+        }
+    }
+
+    space S2 of BuildingSegmentation_DBSCAN {
+        strategy gridsearch;
+        param epsilon_vp = enum(0.5);
+        param m2_thresh_vp = enum(5);
+        param rdp_epsilon_vp = enum(1.2);
+        param min_samples_vp = enum(5);
+        task BuildingSegmentation {
+            param epsilon = epsilon_vp;
+            param m2_thresh = m2_thresh_vp;
+            param rdp_epsilon = rdp_epsilon_vp;
+            param min_samples = min_samples_vp;
+        }
+    }
+}
