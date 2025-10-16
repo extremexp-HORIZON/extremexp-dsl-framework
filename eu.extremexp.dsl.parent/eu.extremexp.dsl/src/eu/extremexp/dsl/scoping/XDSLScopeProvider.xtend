@@ -104,9 +104,20 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 								
 							}
 							else{
-								val workspacePath = System.getenv("SHARED_WORKSPACE_PATH")
-								fileURI = URI.createFileURI(workspacePath + "/" + path)
 								
+								var newPath = ""
+								var add = false 
+								// the following enforces that we use "experiments" and "workflows"
+								for (segment: baseURI.segments.reverseView){
+									if (add){
+										newPath = segment + "/" + newPath
+									}
+									
+									if (segment == "experiments"){
+										add = true
+									}	
+								}
+								fileURI = URI.createFileURI("/" + newPath + path)
 							}
 					
 							try{
