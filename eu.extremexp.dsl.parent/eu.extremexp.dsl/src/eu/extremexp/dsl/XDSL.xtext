@@ -76,11 +76,11 @@ Data:
 	InputData | OutputData
 ;
 InputData:
-	'define' 'input' 'data' name=ID ';'
+	'input' 'data' name=ID ';'
 ;
 
 OutputData:
-	'define' 'output' 'data' name=ID ';' 
+	'output' 'data' name=ID ';' 
 ;
 
 DataConfiguration:
@@ -92,12 +92,13 @@ DataConfiguration:
 
 
 Task:
-	 (abstract?='task' name=ID ';') |
-	 (configured?='task' name=ID taskConfiguration=TaskConfigurationBody) 
+	 'task' name=ID 
+	 ((abstract?= ';') |
+	 (taskConfiguration= TaskConfigurationBody ))
 ;
 
 TaskConfigurationBody:
-	{TaskConfigurationBody}'{'
+	{TaskConfigurationBody}'{' 
 	((
 			// shared members (i.e. super members)
 			inputs += InputData			|
@@ -115,8 +116,7 @@ TaskConfigurationBody:
 	
 	)* 
 	|
-	(notImplemented = '...'))
-	'}'
+	(notImplemented = '...'))'}'
 ;
 
 TaskConfiguration:
@@ -209,23 +209,50 @@ Case:
 ;
 
 // we have to remove abstract tasks
-ComponentWithData:
-	TaskConfiguration | Workflow 
-;
+//ComponentWithData:
+//	TaskConfiguration | Workflow 
+//;
+//
+//
+//DataConnection:
+//	(component=[ComponentWithData] fromComponent?='.')? ref=[Data]
+//;
+//
+//InputDataLink:
+//	node=Task '-->' data=InputData
+//;
+//
+//OutputDataLink:
+//	node=LinkableNode | data=OutputData
+//;
+
+//// DataLink
+//// TODO
+//GlobalID:
+//	ID('.'ID)?
+//;
 
 
-DataConnection:
-	(component=[ComponentWithData] fromComponent?='.')? ref=[Data]
-;
-
-// DataLink
-// TODO
-GlobalID:
-	ID('.'ID)?
-;
 DataLink:
-	inputData=GlobalID '-->' outputData=GlobalID';'
+	InputDataLink | OutputDataLink | TaskDataLink
+//    inputData=[InputData] '-->' outputNode=[Node] '.' outputNodeData=ID ';' |
+//    inputNode=[Node] '.' inputNodeData=ID '-->' outputNode=[Node] '.' outputNodeData=ID ';' |
+//    inputNode=[Node] '.' inputNodeData=ID '-->' outputData=[OutputData] ';'	
+	
 ;
+
+InputDataLink:
+	inputData=[InputData] '-->' outputNode=[Node] ('.' outputNodeData=ID)? ';'   
+;
+
+OutputDataLink:
+	inputNode=[Node] ('.' inputNodeData=ID)?  '-->' outputData=[OutputData] ';'   
+;
+
+TaskDataLink:
+	inputNode=[Node] ('.' inputNodeData=ID)? '-->' outputNode=[Node] ('.' outputNodeData=ID)? ';'
+;
+
 
 // Parameter and Metric
 Parameter:

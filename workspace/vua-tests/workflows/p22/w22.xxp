@@ -1,9 +1,23 @@
 workflow w1{
+	input data d1;
+	output data d2;
 	task t3;
+	task t4;
+	
+	START -> t3;
+	d1 --> t3.SomeData;
+	t3.A --> d2;
+	t4.B --> t3.A;
 }
 
 workflow w2 from w1 {
 		task t3{
-				
+		implementation "somewhere";		
+	}
+}
+
+workflow w4 from w1 {
+		task t3{
+		implementation "somewhere else";		
 	}
 }
