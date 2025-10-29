@@ -195,7 +195,7 @@ ConditionalLink:
 ;
 
 RegularLink:
-	( input=LinkableNode) ('->' ouput+=LinkableNode)+ ';'
+	( input=LinkableNode) ('->' output+=LinkableNode)+ ';'
 ;
 
 ExceptionalLink:
