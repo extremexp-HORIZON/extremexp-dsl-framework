@@ -365,6 +365,7 @@ Space:
 			( 
 				'strategy' strategy=ID ';' 	|
 				params += Param				|
+				param_values += ParamValues |
 				attributes += Attribute		|		
 				taskConfigurations += TaskConfiguration 
 				
@@ -376,7 +377,9 @@ Space:
     '}'
 ;
 
-
+ParamValues returns Param:
+	'param_values' name=ID '=' value=ParamValue ';' 
+;
 
 Param:
 	'param' name=ID (assigned?='=' (value=ParamValue | ref=[Param|ID]))? ';' 
