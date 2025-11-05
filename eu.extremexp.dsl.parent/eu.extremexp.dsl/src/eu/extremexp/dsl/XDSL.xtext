@@ -4,7 +4,9 @@ generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 
 Root:
+
 	(
+		'import' externalWorkflows+=STRING ';'|
 		workflows += Workflow		|
 		groups += Group				|
 		parameterTypes += ParameterType	|
@@ -76,11 +78,11 @@ Data:
 	InputData | OutputData
 ;
 InputData:
-	'input' 'data' name=ID ';'
+	'define' 'input' 'data' name=ID ';'
 ;
 
 OutputData:
-	'output' 'data' name=ID ';' 
+	'define' 'output' 'data' name=ID ';' 
 ;
 
 DataConfiguration:
@@ -320,7 +322,7 @@ Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
         (
-        	refs += Reference |
+//        	refs += Reference |
         	interactions += Interaction	| 
         	spaces += Space 			|
         	control = Control 			|
@@ -329,10 +331,10 @@ Experiment:
         
     '}'
 ;
-
-Reference:
-	'ref' ref=STRING ';'
-;
+//
+//Reference:
+//	'ref' ref=STRING ';'
+//;
 
 Interaction:
 	'interaction' name=ID '{'

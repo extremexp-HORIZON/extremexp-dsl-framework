@@ -13,10 +13,8 @@ import eu.extremexp.dsl.xDSL.AssembledWorkflow
 import org.eclipse.xtext.scoping.Scopes
 import eu.extremexp.dsl.xDSL.Space
 import eu.extremexp.dsl.xDSL.Experiment
-import eu.extremexp.dsl.xDSL.Reference
 import org.eclipse.emf.common.util.URI
-import org.eclipse.core.resources.IProject
-import org.eclipse.core.runtime.Path
+import eu.extremexp.dsl.xDSL.Root
 
 /**
  * This class contains custom scoping description.
@@ -93,15 +91,14 @@ class XDSLScopeProvider extends AbstractXDSLScopeProvider {
 					
 					
 					// then add ref workflows
-					for (refObj : experiment.refs){
-						val path = (refObj as Reference).ref
+					for (importPath : (experiment.eContainer as Root).externalWorkflows){
+						val path = "workflows/" + importPath 
 						if (path !== null && !path.trim.empty){
 							val baseURI = experiment.eResource.URI
 							var fileURI = URI.createFileURI(path)
 							if (baseURI.platform){
 								val projectName = baseURI.segment(1)
 								fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
-								
 							}
 							else{
 								

@@ -3,11 +3,6 @@
  */
 package eu.extremexp.dsl.validation
 
-import org.eclipse.xtext.validation.Check
-import eu.extremexp.dsl.xDSL.Reference
-import eu.extremexp.dsl.xDSL.Experiment
-import org.eclipse.emf.common.util.URI
-import eu.extremexp.dsl.xDSL.XDSLPackage
 
 /**
  * This class contains custom validation rules. 
@@ -16,46 +11,5 @@ import eu.extremexp.dsl.xDSL.XDSLPackage
  */
 class XDSLValidator extends AbstractXDSLValidator {
 	
-	public static val INVALID_FILE = 'cannotFindFile'
-
-	@Check
-	def checkRefFileExist(Reference refObj) {
-		val path = refObj.ref
-		val experiment = refObj.eContainer as Experiment
-		if (path !== null && !path.trim.empty){
-			val baseURI = experiment.eResource.URI
-			var fileURI = URI.createFileURI(path)
-			if (baseURI.platform){
-				val projectName = baseURI.segment(1)
-				fileURI = URI.createPlatformResourceURI(projectName + "/" + path, true)
-				
-			}
-			else{
-				var newPath = ""
-				var add = false 
-				// the following enforces that we use "experiments" and "workflows"
-				for (segment: baseURI.segments.reverseView){
-					if (add){
-						newPath = segment + "/" + newPath
-					}
-					
-					if (segment == "experiments"){
-						add = true
-					}	
-				}
-				fileURI = URI.createFileURI("/" + newPath + path)
-			}
 	
-			try{
-				
-				val resource = experiment.eResource.resourceSet.getResource(fileURI, true)
-				}
-				
-			catch (Exception e){
-				warning('Cannot find file ' + refObj.ref , 
-				XDSLPackage.Literals.REFERENCE__REF,
-				INVALID_FILE)
-			}
-		}
-	}
 }
