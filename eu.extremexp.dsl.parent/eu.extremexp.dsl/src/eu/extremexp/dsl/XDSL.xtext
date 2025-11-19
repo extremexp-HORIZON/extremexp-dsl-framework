@@ -389,7 +389,7 @@ ParamValue:
 	rangeValue=ParamValueRange | enumValue=ParamValueEnum | primitiveValue=PrimitiveValue | listValue=ParamValueList
 ;
 ParamValueRange:
-	'range' '('start=INT ',' end=INT (',' step=INT)?')'
+	'range' '('start=NumberValue ',' end=NumberValue (',' step=NumberValue)?')'
 ;
 ParamValueEnum:
 	'enum' '(' values+=PrimitiveValue (',' values+=PrimitiveValue)* ')'
@@ -401,6 +401,9 @@ PrimitiveValue:
 	INT | STRING | FLOAT | BOOLEAN
 ;
 
+NumberValue:
+	FLOAT | INT
+;
 terminal FLOAT:
 	'-'? INT '.' INT
 ;
