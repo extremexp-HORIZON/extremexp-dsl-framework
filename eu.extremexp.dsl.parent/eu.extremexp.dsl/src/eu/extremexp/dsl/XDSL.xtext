@@ -87,7 +87,7 @@ OutputData:
 
 DataConfiguration:
 	'configure' 'data' data=[Data] '{'
-	('path' path=STRING ';' | 'type' type=STRING ';' | 'default' defaultValue=ParamValue ';'  )*
+	('path' path=STRING ';' | 'type' type=STRING ';' | 'default' defaultValue=ParamValue ';' | 'name' name=STRING ';' | 'project' project=STRING ';' )*
 	
 	'}'
 ;
