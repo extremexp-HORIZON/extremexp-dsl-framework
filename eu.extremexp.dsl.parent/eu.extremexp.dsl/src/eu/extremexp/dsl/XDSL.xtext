@@ -321,14 +321,14 @@ PrimitiveType returns ParameterType:
 Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
+        (control = Control)?
         (
 //        	refs += Reference |
-        	interactions += Interaction	| 
+        	interactions += Interaction	|
         	spaces += Space 			|
-        	control = Control 			|
-        	tasks += Task 
-        )* 
-        
+        	tasks += Task
+        )*
+
     '}'
 ;
 //
