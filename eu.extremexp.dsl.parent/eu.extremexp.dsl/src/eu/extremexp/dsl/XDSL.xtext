@@ -92,7 +92,7 @@ OutputData:
 
 DataConfiguration:
 	'configure' 'data' data=[Data] '{'
-	('path' path=STRING ';' | 'type' type=STRING ';' | 'default' defaultValue=ParamValue ';'  )*
+	('path' path=STRING ';' | 'type' type=STRING ';' | 'default' defaultValue=ParamValue ';' | 'name' name=STRING ';' | 'project' project=STRING ';' )*
 	
 	'}'
 ;
@@ -326,14 +326,14 @@ PrimitiveType returns ParameterType:
 Experiment:
     'experiment' name=ID '{'
     	('intent' intent=ID ';')?
+        (control = Control)?
         (
 //        	refs += Reference |
-        	interactions += Interaction	| 
+        	interactions += Interaction	|
         	spaces += Space 			|
-        	control = Control 			|
-        	tasks += Task 
-        )* 
-        
+        	tasks += Task
+        )*
+
     '}'
 ;
 //
