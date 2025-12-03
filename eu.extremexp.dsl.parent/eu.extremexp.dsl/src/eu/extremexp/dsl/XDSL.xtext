@@ -3,6 +3,7 @@ grammar eu.extremexp.dsl.XDSL with org.eclipse.xtext.common.Terminals
 generate xDSL "http://www.extremexp.eu/dsl/XDSL"
 
 
+
 Root:
 
 	(
@@ -14,6 +15,10 @@ Root:
 	)* 
 	
 ;
+
+@Override 
+terminal ID: 
+  ('^')?('a'..'z'|'A'..'Z'|'_'|'-') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'-')*;
 
 // workflow is an abstract class that can be extended by the following classes
 Workflow:
